@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Identity Verification (KYC) — AnnexLK</title>
+  
+  <link rel="stylesheet" href="/assets/css/variables.css">
+  <link rel="stylesheet" href="/assets/css/base.css">
+  <link rel="stylesheet" href="/assets/css/layout.css">
+  <link rel="stylesheet" href="/assets/css/components.css">
+  <link rel="stylesheet" href="/assets/css/forms.css">
+  <link rel="stylesheet" href="/assets/css/responsive.css">
+  
+  <style>
+    .kyc-form-container {
+      max-width: 650px;
+      margin: 40px auto;
+      background-color: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius-lg);
+      padding: 40px;
+      box-shadow: var(--shadow-lg);
+    }
+    
+    /* File upload design */
+    .file-upload-box {
+      border: 2px dashed var(--surface-border);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      text-align: center;
+      cursor: pointer;
+      position: relative;
+      background-color: var(--background);
+      transition: all var(--transition-fast);
+      margin-bottom: 20px;
+    }
+    
+    .file-upload-box:hover {
+      border-color: var(--primary);
+      background-color: var(--primary-light);
+    }
+    
+    .file-upload-box input[type="file"] {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+    }
+    
+    .file-upload-icon {
+      font-size: 28px;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .file-preview {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--success);
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <header id="app-header"></header>
+
+  <main class="main-layout">
+    <div class="container">
+      <div class="kyc-form-container">
+        <h2 class="mb-10 text-center">Owner Identity Verification</h2>
+        <p class="text-muted text-center mb-30" style="font-size: 14px;">Complete your KYC verification to unlock property listing publication. This information is kept strictly private.</p>
+        
+        <!-- Status indicator -->
+        <div id="kyc-status-indicator" class="trust-indicator hidden" style="display: flex; align-items: center; gap: 12px; padding: 16px; background-color: var(--background); border-radius: var(--radius-md); margin-bottom: 24px;">
+          <span style="font-size: 24px;">⏳</span>
+          <div>
+            <div style="font-weight: 700; font-size: 16px;" id="kyc-status-label">PENDING REVIEW</div>
+            <p class="text-muted" style="font-size: 13px;" id="kyc-status-desc">Your documents have been submitted. An administrator will review your account shortly.</p>
+          </div>
+        </div>
+
+        <form id="kyc-form">
+          <div class="form-group">
+            <label for="fullName" class="form-label">Legal Full Name (As in ID)</label>
+            <input type="text" id="fullName" class="form-control" placeholder="e.g. Sahan Perera" required>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="idType" class="form-label">Identity Document Type</label>
+              <select id="idType" class="form-control" required>
+                <option value="NIC">NIC (National Identity Card)</option>
+                <option value="Passport">Passport</option>
+                <option value="Driving License">Driving License</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="idNumber" class="form-label">Document Number</label>
+              <input type="text" id="idNumber" class="form-control" placeholder="e.g. 199912345678" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="dob" class="form-label">Date of Birth</label>
+              <input type="date" id="dob" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+              <label for="phoneNumber" class="form-label">Contact Phone Number</label>
+              <input type="tel" id="phoneNumber" class="form-control" placeholder="+94771234567" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="address" class="form-label">Legal Permanent Address</label>
+            <textarea id="address" class="form-control" placeholder="Your full residential address matching your identity sheet" required></textarea>
+          </div>
+
+          <!-- Document Upload Fields -->
+          <h3 class="mb-20 mt-20" style="font-size: 16px;">Upload Identity Photos</h3>
+          
+          <label class="form-label">ID Front Image (JPEG/PNG/WebP, max 5MB)</label>
+          <div class="file-upload-box">
+            <span class="file-upload-icon">📂</span>
+            <strong>Choose ID Front Image</strong>
+            <p class="text-muted" style="font-size: 11px;">or drag and drop here</p>
+            <input type="file" id="id_front" accept="image/jpeg,image/png,image/webp" required>
+            <div class="file-preview hidden" id="preview-front"></div>
+          </div>
+
+          <label class="form-label">ID Back Image</label>
+          <div class="file-upload-box">
+            <span class="file-upload-icon">📂</span>
+            <strong>Choose ID Back Image</strong>
+            <p class="text-muted" style="font-size: 11px;">or drag and drop here</p>
+            <input type="file" id="id_back" accept="image/jpeg,image/png,image/webp" required>
+            <div class="file-preview hidden" id="preview-back"></div>
+          </div>
+
+          <label class="form-label">Selfie or verification photo (Optional)</label>
+          <div class="file-upload-box">
+            <span class="file-upload-icon">📸</span>
+            <strong>Choose Selfie Photo</strong>
+            <p class="text-muted" style="font-size: 11px;">or drag and drop here</p>
+            <input type="file" id="selfie" accept="image/jpeg,image/png,image/webp">
+            <div class="file-preview hidden" id="preview-selfie"></div>
+          </div>
+
+          <button type="submit" id="submit-btn" class="btn btn-primary" style="width: 100%; height: 46px; margin-top: 20px;">Submit KYC Verification</button>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <footer id="app-footer"></footer>
+
+  <script type="module">
+    import Navigation from '/assets/js/utils/navigation.js';
+    import client from '/assets/js/api/client.js';
+    import UI from '/assets/js/components/ui.js';
+    import Session from '/assets/js/state/session.js';
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      Navigation.init();
+
+      // Route Guard
+      if (!Session.isAuthenticated()) {
+        window.location.href = '/pages/login.html';
+        return;
+      }
+      
+      const user = Session.getUser();
+      if (user.role !== 'PROPERTY_OWNER') {
+        window.location.href = '/index.html';
+        return;
+      }
+
+      // Check current KYC status
+      try {
+        const res = await client.get('kyc/status');
+        if (res.success && res.data.status !== 'NOT_SUBMITTED') {
+          const status = res.data.status;
+          
+          const statusInd = document.getElementById('kyc-status-indicator');
+          const label = document.getElementById('kyc-status-label');
+          const desc = document.getElementById('kyc-status-desc');
+          
+          statusInd.classList.remove('hidden');
+          
+          if (status === 'PENDING_REVIEW') {
+            label.innerText = 'PENDING ADMINISTRATIVE REVIEW';
+            desc.innerText = 'Your verification request has been received and is in review queue. This typically takes 24 hours.';
+            document.getElementById('kyc-form').classList.add('hidden');
+          } else if (status === 'APPROVED') {
+            label.innerText = 'IDENTITY FULLY VERIFIED';
+            desc.innerText = 'Congratulations! Your KYC submission has been approved. You are authorized to list your property spaces.';
+            statusInd.style.backgroundColor = 'var(--success-light)';
+            statusInd.querySelector('span').innerText = '✅';
+            document.getElementById('kyc-form').classList.add('hidden');
+          } else if (status === 'REJECTED') {
+            label.innerText = 'VERIFICATION REJECTED';
+            desc.innerText = `Reason: ${res.data.review_notes || 'Invalid document credentials.'}. Please re-submit your files.`;
+            statusInd.style.backgroundColor = 'var(--danger-light)';
+            statusInd.querySelector('span').innerText = '❌';
+            // Allow them to fill form again
+          }
+        }
+      } catch (err) {
+        // Ignore
+      }
+
+      // File input labels update
+      const setupFilePreview = (inputId, previewId) => {
+        const input = document.getElementById(inputId);
+        const preview = document.getElementById(previewId);
+        input.addEventListener('change', () => {
+          if (input.files.length > 0) {
+            preview.innerText = `📄 ${input.files[0].name} (${(input.files[0].size / 1024 / 1024).toFixed(2)} MB)`;
+            preview.classList.remove('hidden');
+          } else {
+            preview.classList.add('hidden');
+          }
+        });
+      };
+      
+      setupFilePreview('id_front', 'preview-front');
+      setupFilePreview('id_back', 'preview-back');
+      setupFilePreview('selfie', 'preview-selfie');
+
+      // Form submission
+      const form = document.getElementById('kyc-form');
+      const submitBtn = document.getElementById('submit-btn');
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const formData = new FormData();
+        formData.append('fullName', document.getElementById('fullName').value.trim());
+        formData.append('dob', document.getElementById('dob').value);
+        formData.append('idType', document.getElementById('idType').value);
+        formData.append('idNumber', document.getElementById('idNumber').value.trim());
+        formData.append('address', document.getElementById('address').value.trim());
+        formData.append('phoneNumber', document.getElementById('phoneNumber').value.trim());
+
+        const frontFile = document.getElementById('id_front').files[0];
+        const backFile = document.getElementById('id_back').files[0];
+        const selfieFile = document.getElementById('selfie').files[0];
+
+        formData.append('id_front', frontFile);
+        formData.append('id_back', backFile);
+        if (selfieFile) {
+          formData.append('selfie', selfieFile);
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.innerText = 'Uploading files...';
+
+        try {
+          const res = await client.post('kyc', formData);
+          if (res.success) {
+            UI.showToast('KYC documents submitted successfully!', 'success');
+            setTimeout(() => {
+              window.location.reload();
+            }, 1000);
+          }
+        } catch (err) {
+          UI.showToast(err.message || 'KYC submission failed.', 'error');
+          submitBtn.disabled = false;
+          submitBtn.innerText = 'Submit KYC Verification';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

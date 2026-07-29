@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Profile — AnnexLK</title>
+  
+  <link rel="stylesheet" href="/assets/css/variables.css">
+  <link rel="stylesheet" href="/assets/css/base.css">
+  <link rel="stylesheet" href="/assets/css/layout.css">
+  <link rel="stylesheet" href="/assets/css/components.css">
+  <link rel="stylesheet" href="/assets/css/forms.css">
+  <link rel="stylesheet" href="/assets/css/responsive.css">
+  
+  <style>
+    .profile-card {
+      background-color: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius-lg);
+      padding: 30px;
+      box-shadow: var(--shadow-md);
+      margin-bottom: 30px;
+    }
+    .trust-indicator {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      background-color: var(--background);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--surface-border);
+      margin-bottom: 24px;
+    }
+  </style>
+</head>
+<body>
+
+  <header id="app-header"></header>
+
+  <main class="main-layout">
+    <div class="container">
+      <div class="grid dashboard-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="dashboard-sidebar">
+          <div class="profile-card" style="padding: 20px; text-align: center; margin-bottom: 20px;">
+            <div style="font-size: 64px; margin-bottom: 12px;">👤</div>
+            <h3 id="sidebar-name">Loading...</h3>
+            <p id="sidebar-role" class="badge badge-primary mt-10">...</p>
+          </div>
+          
+          <div class="nav-links flex flex-col gap-10">
+            <a href="/pages/profile.html" class="nav-link active">👤 My Profile Details</a>
+            <a href="/pages/favourites.html" class="nav-link" id="renter-fav-link">❤️ Favourites</a>
+            <a href="/pages/owner-dashboard.html" class="nav-link hidden" id="owner-dash-link">📊 Owner Dashboard</a>
+            <a href="/pages/kyc.html" class="nav-link hidden" id="owner-kyc-link">🛡️ Identity Verification</a>
+          </div>
+        </aside>
+        
+        <!-- Main Content Area -->
+        <section class="dashboard-content">
+          <div class="profile-card">
+            <h2 class="mb-20">Account Trust Level</h2>
+            
+            <!-- Trust Badge Section -->
+            <div class="trust-indicator">
+              <span style="font-size: 24px;" id="trust-icon">🛡️</span>
+              <div>
+                <div style="font-weight: 700; font-size: 16px;" id="trust-level-label">REGISTERED</div>
+                <p class="text-muted" style="font-size: 13px;" id="trust-description">Basic account. You must verify your phone and identity before listing rooms.</p>
+              </div>
+              <span class="badge badge-warning" id="trust-badge" style="margin-left: auto;">REGISTERED</span>
+            </div>
+
+            <!-- KYC Action Banner -->
+            <div id="kyc-action-banner" class="switch-container hidden" style="margin-bottom: 30px; background-color: var(--primary-light); border-color: var(--primary);">
+              <div>
+                <strong class="text-primary">Verify Your Identity (KYC)</strong>
+                <p class="text-muted" style="font-size: 13px;">Submit your ID card/passport to list properties on AnnexLK.</p>
+              </div>
+              <a href="/pages/kyc.html" class="btn btn-primary">Complete KYC</a>
+            </div>
+
+            <!-- Phone Verification Panel -->
+            <div id="phone-verification-section" class="switch-container" style="margin-bottom: 30px;">
+              <div>
+                <strong>Phone Number Verification</strong>
+                <p class="text-muted" style="font-size: 13px;" id="phone-status-text">Your phone number is not verified.</p>
+              </div>
+              <div>
+                <button id="verify-phone-btn" class="btn btn-outline">Verify Phone</button>
+                <div id="otp-input-container" class="hidden flex align-center gap-10" style="margin-top: 10px;">
+                  <input type="text" id="otp-code" class="form-control" placeholder="Enter 6-digit OTP" style="width: 140px; padding: 8px 12px;">
+                  <button id="confirm-otp-btn" class="btn btn-primary" style="padding: 8px 16px;">Confirm</button>
+                </div>
+              </div>
+            </div>
+
+            <h2 class="mb-20">Edit Profile Details</h2>
+            <form id="profile-form">
+              <div class="form-group">
+                <label for="profile-name" class="form-label">Full Legal Name</label>
+                <input type="text" id="profile-name" class="form-control" required>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="profile-phone" class="form-label">Phone Number (International format)</label>
+                  <input type="tel" id="profile-phone" class="form-control">
+                </div>
+                <div class="form-group">
+                  <label for="profile-dob" class="form-label">Date of Birth</label>
+                  <input type="date" id="profile-dob" class="form-control">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="profile-address" class="form-label">Address</label>
+                <textarea id="profile-address" class="form-control" placeholder="Your residential address"></textarea>
+              </div>
+
+              <button type="submit" id="save-btn" class="btn btn-primary" style="padding: 12px 30px;">Save Profile</button>
+            </form>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <footer id="app-footer"></footer>
+
+  <script type="module">
+    import Navigation from '/assets/js/utils/navigation.js';
+    import client from '/assets/js/api/client.js';
+    import UI from '/assets/js/components/ui.js';
+    import Session from '/assets/js/state/session.js';
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      Navigation.init();
+
+      // Guard Route
+      if (!Session.isAuthenticated()) {
+        window.location.href = '/pages/login.html';
+        return;
+      }
+
+      const user = Session.getUser();
+      
+      // Update sidebar
+      document.getElementById('sidebar-name').innerText = user.full_name || 'My Profile';
+      document.getElementById('sidebar-role').innerText = user.role.replace('_', ' ');
+
+      // Set sidebar links based on role
+      if (user.role === 'PROPERTY_OWNER') {
+        document.getElementById('owner-dash-link').classList.remove('hidden');
+        document.getElementById('owner-kyc-link').classList.remove('hidden');
+        document.getElementById('renter-fav-link').classList.add('hidden');
+      }
+
+      // Fetch active profile details from REST API
+      try {
+        const res = await client.get('profile');
+        if (res.success) {
+          const profile = res.data;
+          
+          document.getElementById('profile-name').value = profile.full_name || '';
+          document.getElementById('profile-phone').value = profile.phone_number || '';
+          document.getElementById('profile-address').value = profile.address || '';
+          
+          if (profile.date_of_birth) {
+            // format date YYYY-MM-DD
+            document.getElementById('profile-dob').value = profile.date_of_birth.substring(0, 10);
+          }
+
+          updateTrustUI(profile.kyc_status, profile.phone_number);
+        }
+      } catch (err) {
+        UI.showToast('Failed to load profile details: ' + err.message, 'error');
+      }
+
+      // Update Trust Indicators
+      function updateTrustUI(status, phone) {
+        const badge = document.getElementById('trust-badge');
+        const label = document.getElementById('trust-level-label');
+        const desc = document.getElementById('trust-description');
+        const icon = document.getElementById('trust-icon');
+
+        badge.className = `badge`;
+        badge.innerText = status;
+
+        if (status === 'REGISTERED') {
+          badge.classList.add('badge-danger');
+          label.innerText = 'REGISTERED';
+          desc.innerText = 'Basic account. You must verify your phone and identity (KYC) before listing rooms.';
+          icon.innerText = '🛡️';
+          
+          if (user.role === 'PROPERTY_OWNER') {
+            document.getElementById('kyc-action-banner').classList.remove('hidden');
+          }
+        } else if (status === 'PHONE_VERIFIED') {
+          badge.classList.add('badge-warning');
+          label.innerText = 'PHONE VERIFIED';
+          desc.innerText = 'Phone verified. Next step: complete identity document verification.';
+          icon.innerText = '📱';
+          
+          if (user.role === 'PROPERTY_OWNER') {
+            document.getElementById('kyc-action-banner').classList.remove('hidden');
+          }
+        } else {
+          badge.classList.add('badge-success');
+          label.innerText = 'IDENTITY VERIFIED';
+          desc.innerText = 'Identity verified. You are clear to publish, edit, and promote property listings.';
+          icon.innerText = '✅';
+          
+          // Disable Verify Phone UI since they are fully verified
+          document.getElementById('verify-phone-btn').classList.add('hidden');
+          document.getElementById('phone-status-text').innerText = `Your phone number (${phone}) is fully verified.`;
+          document.getElementById('kyc-action-banner').classList.add('hidden');
+        }
+
+        // If phone verified, disable verify button
+        if (status !== 'REGISTERED') {
+          document.getElementById('verify-phone-btn').classList.add('hidden');
+          document.getElementById('phone-status-text').innerText = `Your phone number (${phone}) is verified.`;
+        }
+      }
+
+      // Handle Save Profile Form
+      const form = document.getElementById('profile-form');
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const saveBtn = document.getElementById('save-btn');
+        saveBtn.disabled = true;
+        saveBtn.innerText = 'Saving...';
+
+        const payload = {
+          fullName: document.getElementById('profile-name').value.trim(),
+          phoneNumber: document.getElementById('profile-phone').value.trim() || null,
+          dateOfBirth: document.getElementById('profile-dob').value || null,
+          address: document.getElementById('profile-address').value.trim() || null,
+        };
+
+        try {
+          const res = await client.patch('profile', payload);
+          if (res.success) {
+            UI.showToast('Profile updated successfully!', 'success');
+            
+            // Sync local storage user model full_name
+            const localUser = Session.getUser();
+            localUser.full_name = res.data.full_name;
+            Session.save(localUser, Session.getToken());
+            document.getElementById('sidebar-name').innerText = res.data.full_name;
+          }
+        } catch (err) {
+          UI.showToast(err.message || 'Failed to save profile.', 'error');
+        } finally {
+          saveBtn.disabled = false;
+          saveBtn.innerText = 'Save Profile';
+        }
+      });
+
+      // Handle Verify Phone click
+      const verifyBtn = document.getElementById('verify-phone-btn');
+      const otpContainer = document.getElementById('otp-input-container');
+      const otpInput = document.getElementById('otp-code');
+      const confirmOtpBtn = document.getElementById('confirm-otp-btn');
+
+      verifyBtn.addEventListener('click', async () => {
+        const phoneInput = document.getElementById('profile-phone').value.trim();
+        if (!phoneInput) {
+          UI.showToast('Please enter and save a phone number in your profile details first.', 'warning');
+          return;
+        }
+
+        verifyBtn.disabled = true;
+        verifyBtn.innerText = 'Sending...';
+
+        try {
+          // Trigger verify code SMS
+          const res = await client.post('profile/verify-phone');
+          if (res.success) {
+            UI.showToast('Verification code sent successfully. Check your console log!', 'info', 6000);
+            verifyBtn.classList.add('hidden');
+            otpContainer.classList.remove('hidden');
+          }
+        } catch (err) {
+          UI.showToast(err.message || 'Failed to request code.', 'error');
+          verifyBtn.disabled = false;
+          verifyBtn.innerText = 'Verify Phone';
+        }
+      });
+
+      // Handle OTP Confirmation
+      confirmOtpBtn.addEventListener('click', async () => {
+        const code = otpInput.value.trim();
+        if (!code) {
+          UI.showToast('Please enter the 6-digit OTP code.', 'warning');
+          return;
+        }
+
+        confirmOtpBtn.disabled = true;
+        confirmOtpBtn.innerText = 'Verifying...';
+
+        try {
+          const res = await client.post('profile/confirm-phone', { code });
+          if (res.success) {
+            UI.showToast('Phone number verified successfully!', 'success');
+            
+            // Reload page to refresh statuses
+            setTimeout(() => {
+              window.location.reload();
+            }, 1000);
+          }
+        } catch (err) {
+          UI.showToast(err.message || 'OTP verification failed.', 'error');
+          confirmOtpBtn.disabled = false;
+          confirmOtpBtn.innerText = 'Confirm';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

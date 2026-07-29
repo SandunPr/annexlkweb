@@ -1,0 +1,14 @@
+{
+  "name": "annexlk-web",
+  "version": "1.0.0",
+  "description": "AnnexLK Frontend discovery platform web client",
+  "main": "index.html",
+  "scripts": {
+    "dev": "vite --port 3000",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0"
+  }
+}

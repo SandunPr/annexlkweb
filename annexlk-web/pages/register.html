@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up — AnnexLK</title>
+  
+  <link rel="stylesheet" href="/assets/css/variables.css">
+  <link rel="stylesheet" href="/assets/css/base.css">
+  <link rel="stylesheet" href="/assets/css/layout.css">
+  <link rel="stylesheet" href="/assets/css/components.css">
+  <link rel="stylesheet" href="/assets/css/forms.css">
+  <link rel="stylesheet" href="/assets/css/responsive.css">
+  
+  <style>
+    .auth-container {
+      max-width: 500px;
+      margin: 40px auto;
+      background-color: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius-lg);
+      padding: 40px;
+      box-shadow: var(--shadow-lg);
+    }
+    .role-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .role-card {
+      border: 2px solid var(--surface-border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      user-select: none;
+    }
+    .role-card:hover {
+      border-color: var(--primary-light);
+    }
+    .role-card.active {
+      border-color: var(--primary);
+      background-color: var(--primary-light);
+    }
+    .role-card-icon {
+      font-size: 24px;
+      display: block;
+      margin-bottom: 8px;
+    }
+    .password-hint {
+      font-size: 11px;
+      color: var(--text-light);
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+
+  <header id="app-header"></header>
+
+  <main class="main-layout flex align-center">
+    <div class="container">
+      <div class="auth-container">
+        <h2 class="mb-10 text-center">Create an Account</h2>
+        <p class="text-muted text-center mb-20" style="font-size: 14px;">Select your role and enter your details to sign up.</p>
+        
+        <form id="register-form">
+          <!-- Role Toggle -->
+          <label class="form-label">I want to...</label>
+          <div class="role-cards">
+            <div class="role-card active" data-role="RENTER">
+              <span class="role-card-icon">🔍</span>
+              <strong>Find Properties</strong>
+              <p class="text-muted" style="font-size: 11px; margin-top: 4px;">Search and contact owners</p>
+            </div>
+            
+            <div class="role-card" data-role="PROPERTY_OWNER">
+              <span class="role-card-icon">🏡</span>
+              <strong>List Properties</strong>
+              <p class="text-muted" style="font-size: 11px; margin-top: 4px;">Publish rooms & annexes</p>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="fullName" class="form-label">Full Name</label>
+            <input type="text" id="fullName" class="form-control" placeholder="e.g. Sahan Perera" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="email" class="form-label">Email Address</label>
+            <input type="email" id="email" class="form-control" placeholder="name@domain.com" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="phoneNumber" class="form-label">Phone Number (Optional)</label>
+            <input type="tel" id="phoneNumber" class="form-control" placeholder="+94771234567">
+          </div>
+          
+          <div class="form-group">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" id="password" class="form-control" placeholder="••••••••" required>
+            <p class="password-hint">Min. 8 characters, at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special symbol.</p>
+          </div>
+
+          <button type="submit" id="submit-btn" class="btn btn-primary" style="width: 100%; height: 46px;">Sign Up</button>
+        </form>
+
+        <p class="text-center text-muted mt-20" style="font-size: 13px;">
+          Already have an account? <a href="/pages/login.html" class="text-primary" style="font-weight: 600;">Log In</a>
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <footer id="app-footer"></footer>
+
+  <script type="module">
+    import Navigation from '/assets/js/utils/navigation.js';
+    import AuthService from '/assets/js/auth/authService.js';
+    import UI from '/assets/js/components/ui.js';
+    
+    document.addEventListener('DOMContentLoaded', () => {
+      Navigation.init();
+
+      // Handle Role Card Toggle
+      const cards = document.querySelectorAll('.role-card');
+      let selectedRole = 'RENTER';
+
+      cards.forEach(card => {
+        card.addEventListener('click', () => {
+          cards.forEach(c => c.classList.remove('active'));
+          card.classList.add('active');
+          selectedRole = card.getAttribute('data-role');
+        });
+      });
+
+      // If query parameters define a role, apply it
+      const urlParams = new URLSearchParams(window.location.search);
+      const queryRole = urlParams.get('role');
+      if (queryRole === 'PROPERTY_OWNER') {
+        const ownerCard = document.querySelector('.role-card[data-role="PROPERTY_OWNER"]');
+        if (ownerCard) ownerCard.click();
+      }
+
+      // Handle Form Submission
+      const form = document.getElementById('register-form');
+      const submitBtn = document.getElementById('submit-btn');
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const fullName = document.getElementById('fullName').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const phoneNumber = document.getElementById('phoneNumber').value.trim();
+        const password = document.getElementById('password').value;
+
+        submitBtn.disabled = true;
+        submitBtn.innerText = 'Creating account...';
+
+        try {
+          const res = await AuthService.register({
+            email,
+            password,
+            roleName: selectedRole,
+            fullName,
+            phoneNumber: phoneNumber || undefined,
+          });
+
+          if (res.success) {
+            UI.showToast('Account created successfully! Redirecting to login...', 'success');
+            setTimeout(() => {
+              window.location.href = '/pages/login.html';
+            }, 1500);
+          }
+        } catch (err) {
+          UI.showToast(err.message || 'Registration failed.', 'error');
+          submitBtn.disabled = false;
+          submitBtn.innerText = 'Sign Up';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

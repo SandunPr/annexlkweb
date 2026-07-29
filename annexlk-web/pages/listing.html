@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Listing Details — AnnexLK</title>
+  
+  <link rel="stylesheet" href="/assets/css/variables.css">
+  <link rel="stylesheet" href="/assets/css/base.css">
+  <link rel="stylesheet" href="/assets/css/layout.css">
+  <link rel="stylesheet" href="/assets/css/components.css">
+  <link rel="stylesheet" href="/assets/css/forms.css">
+  <link rel="stylesheet" href="/assets/css/responsive.css">
+  
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <style>
+    .listing-layout {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 40px;
+    }
+    
+    /* Premium Gallery Styles */
+    .gallery-container {
+      background-color: black;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      position: relative;
+      height: 450px;
+      box-shadow: var(--shadow-md);
+      margin-bottom: 30px;
+    }
+    .gallery-slide {
+      width: 100%;
+      height: 100%;
+      display: none;
+    }
+    .gallery-slide img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    .gallery-nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-full);
+      background-color: rgba(255,255,255,0.7);
+      border: none;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      z-index: 10;
+    }
+    .gallery-nav:hover { background-color: white; transform: translateY(-50%) scale(1.05); }
+    .gallery-nav.prev { left: 20px; }
+    .gallery-nav.next { right: 20px; }
+    
+    .gallery-dots {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 8px;
+      z-index: 10;
+    }
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: var(--radius-full);
+      background-color: rgba(255,255,255,0.5);
+      cursor: pointer;
+    }
+    .dot.active { background-color: white; }
+
+    /* Info card styles */
+    .info-card {
+      background-color: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius-md);
+      padding: 30px;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 30px;
+    }
+    .info-title {
+      font-size: 26px;
+      margin-bottom: 12px;
+      color: var(--text-main);
+    }
+    
+    .price-badge {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+    .price-badge span {
+      font-size: 15px;
+      font-weight: 400;
+      color: var(--text-muted);
+    }
+
+    .facilities-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .facility-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    /* Sticky action bar widget (Mobile) */
+    .sticky-contact-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 70px;
+      background-color: var(--surface);
+      border-top: 1px solid var(--surface-border);
+      box-shadow: 0 -4px 15px rgba(0,0,0,0.06);
+      display: none;
+      align-items: center;
+      padding: 0 20px;
+      z-index: 999;
+      gap: 12px;
+    }
+    
+    @media (max-width: 768px) {
+      .listing-layout { grid-template-columns: 1fr; }
+      .sticky-contact-bar { display: flex; }
+      .hide-mobile-aside { display: none; }
+      .main-layout { padding-bottom: 90px; }
+    }
+    
+    #approx-map {
+      height: 250px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--surface-border);
+      margin-top: 16px;
+    }
+  </style>
+</head>
+<body>
+
+  <header id="app-header"></header>
+
+  <main class="main-layout">
+    <div class="container" id="listing-details-container">
+      
+      <!-- Skeleton Loaders -->
+      <div class="skeleton skeleton-img" style="height: 400px; border-radius: var(--radius-lg); margin-bottom: 30px;"></div>
+      <div class="grid grid-3 gap-20">
+        <div class="skeleton skeleton-text" style="height: 100px; grid-column: span 2;"></div>
+        <div class="skeleton skeleton-btn" style="height: 150px;"></div>
+      </div>
+      
+    </div>
+  </main>
+
+  <!-- Report Modal Container -->
+  <div id="report-modal" class="modal-overlay">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3>Report Suspicious Listing</h3>
+        <button class="modal-close" onclick="closeReportModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="report-form">
+          <div class="form-group">
+            <label for="report-category" class="form-label">Reason for Report</label>
+            <select id="report-category" class="form-control" required>
+              <option value="Fake listing">Fake Listing / Scam Profile</option>
+              <option value="Wrong price">Wrong Price Advertised</option>
+              <option value="Incorrect location">Incorrect / Fake Location</option>
+              <option value="Property no longer available">Property Already Rented / Occupied</option>
+              <option value="Suspicious payment request">Owner Asks Deposit Before Viewing</option>
+              <option value="Misleading photos">Photos Don't Match Real Space</option>
+              <option value="Other">Other Issues</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="report-comment" class="form-label">Add Comments (Optional)</label>
+            <textarea id="report-comment" class="form-control" placeholder="Provide extra details..."></textarea>
+          </div>
+          <button type="submit" id="submit-report-btn" class="btn btn-primary" style="width: 100%;">Submit Report</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sticky Bottom Contact Bar (Mobile view) -->
+  <div class="sticky-contact-bar" id="mobile-contact-bar">
+    <button class="btn btn-primary flex-grow reveal-phone-trigger" style="flex:1;" data-type="call">📞 Call Owner</button>
+    <button class="btn btn-secondary flex-grow reveal-phone-trigger" style="flex:1;" data-type="whatsapp">💬 WhatsApp</button>
+  </div>
+
+  <footer id="app-footer"></footer>
+
+  <script type="module">
+    import Navigation from '/assets/js/utils/navigation.js';
+    import client from '/assets/js/api/client.js';
+    import UI from '/assets/js/components/ui.js';
+    import Session from '/assets/js/state/session.js';
+
+    let currentSlide = 0;
+    let propertyId = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      Navigation.init();
+      
+      const urlParams = new URLSearchParams(window.location.search);
+      const slug = urlParams.get('slug');
+      
+      if (!slug) {
+        window.location.href = '/pages/search.html';
+        return;
+      }
+
+      await loadListingDetails(slug);
+    });
+
+    async function loadListingDetails(slug) {
+      const container = document.getElementById('listing-details-container');
+
+      try {
+        const res = await client.get(`listings/${slug}`);
+        if (res.success) {
+          const p = res.data;
+          propertyId = p.id;
+          
+          document.title = `${p.title} — AnnexLK`;
+
+          // Construct Images Gallery slides
+          const images = p.images && p.images.length > 0 ? p.images : [
+            { medium_path: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=900&q=75', positionName: 'Main' }
+          ];
+
+          const slidesHtml = images.map((img, idx) => `
+            <div class="gallery-slide" style="${idx === 0 ? 'display:block;' : ''}">
+              <img src="${img.medium_path}" alt="Property image ${img.image_position || 1}">
+            </div>
+          `).join('');
+
+          const dotsHtml = images.map((_, idx) => `
+            <div class="dot ${idx === 0 ? 'active' : ''}" onclick="window.setSlide(${idx})"></div>
+          `).join('');
+
+          // Construct Facility Items
+          const facilitiesHtml = p.facilities && p.facilities.length > 0
+            ? p.facilities.map(f => `<div class="facility-item">✔️ ${f.display_name}</div>`).join('')
+            : '<p class="text-muted">No facility listings registered.</p>';
+
+          // Verify Badge
+          let verifiedBadge = '';
+          if (p.kyc_status === 'IDENTITY_VERIFIED' || p.kyc_status === 'TRUSTED_OWNER') {
+            verifiedBadge = `<span class="badge badge-success" style="margin-left: 10px;">🛡️ Verified Owner Identity</span>`;
+          }
+
+          // Build core Layout HTML
+          container.innerHTML = `
+            <!-- Image Slideshow Gallery -->
+            <div class="gallery-container">
+              ${slidesHtml}
+              <button class="gallery-nav prev" onclick="window.changeSlide(-1)">&lt;</button>
+              <button class="gallery-nav next" onclick="window.changeSlide(1)">&gt;</button>
+              <div class="gallery-dots">
+                ${dotsHtml}
+              </div>
+            </div>
+
+            <!-- Content Split Grid -->
+            <div class="listing-layout">
+              <!-- Left Details Area -->
+              <div class="details-left">
+                <div class="info-card">
+                  <div class="flex align-center mb-10">
+                    <span class="badge badge-primary">${p.property_type.replace('_', ' ')}</span>
+                    ${verifiedBadge}
+                  </div>
+                  <h1 class="info-title">${p.title}</h1>
+                  <div class="card-location" style="font-size:15px; margin-bottom: 20px;">
+                    <span>📍</span> ${p.address_text || p.city_name} (${p.district_name} District)
+                  </div>
+                  
+                  <div class="price-badge">
+                    ${parseFloat(p.rent).toLocaleString()} LKR<span> / month</span>
+                  </div>
+                  
+                  <div class="grid grid-3 gap-20 mt-20" style="background-color: var(--background); padding: 15px; border-radius: var(--radius-sm); border: 1px solid var(--surface-border);">
+                    <div>
+                      <small class="text-muted block">Refundable Deposit</small>
+                      <strong>${parseFloat(p.deposit).toLocaleString()} LKR</strong>
+                    </div>
+                    <div>
+                      <small class="text-muted block">Advance Rent</small>
+                      <strong>${p.advance_months} Month(s)</strong>
+                    </div>
+                    <div>
+                      <small class="text-muted block">Utility Bills</small>
+                      <strong>${p.bills_included ? 'Bills Included' : 'Utility Bills Excluded'}</strong>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="info-card">
+                  <h3>Property Description</h3>
+                  <p class="mt-15" style="white-space: pre-line; color: var(--text-muted); font-size:15px;">${p.description}</p>
+                </div>
+
+                <div class="info-card">
+                  <h3>Available Facilities</h3>
+                  <div class="facilities-list">
+                    ${facilitiesHtml}
+                  </div>
+                </div>
+
+                <!-- Privacy Map View -->
+                <div class="info-card">
+                  <h3>Approximate Location</h3>
+                  <p class="text-muted" style="font-size: 13px; margin-top: 4px;">To protect the owner's privacy, this map marker represents an approximate area surrounding the property.</p>
+                  <div id="approx-map"></div>
+                </div>
+              </div>
+
+              <!-- Right Actions Sidebar (Desktop) -->
+              <aside class="details-right hide-mobile-aside">
+                <div class="info-card sticky-sidebar" style="position: sticky; top: 92px;">
+                  <h3 class="mb-20">Contact Property Owner</h3>
+                  
+                  <button class="btn btn-primary reveal-phone-trigger" style="width: 100%; height: 50px; font-size:15px; margin-bottom: 12px;" data-type="call">
+                    📞 Call Owner
+                  </button>
+                  
+                  <button class="btn btn-secondary reveal-phone-trigger" style="width: 100%; height: 50px; font-size:15px; margin-bottom: 24px;" data-type="whatsapp">
+                    💬 Chat on WhatsApp
+                  </button>
+
+                  <div class="text-center" style="border-top:1px solid var(--surface-border); padding-top: 15px;">
+                    <button class="btn btn-outline" onclick="window.openReportModal()" style="width: 100%;">🚨 Report Advertisement</button>
+                  </div>
+                </div>
+
+                <!-- Safety card -->
+                <div class="info-card" style="background-color: var(--warning-light); border-color: var(--warning);">
+                  <strong class="text-secondary" style="font-size: 15px; display:block; margin-bottom: 8px;">⚠️ Renter Safety Guide</strong>
+                  <ul class="text-muted" style="font-size:12px; padding-left: 15px; display:flex; flex-direction:column; gap:8px;">
+                    <li>Always visit and inspect the property in person before paying deposits.</li>
+                    <li>Verify the identity of the owner directly.</li>
+                    <li>Avoid sending money via online transfer to unverified listings.</li>
+                    <li>Report any suspicious listings immediately using our alert button.</li>
+                  </ul>
+                </div>
+              </aside>
+            </div>
+          `;
+
+          // Setup Leaflet map for coordinates
+          setTimeout(() => {
+            initLeafletDetailMap(p.approx_latitude, p.approx_longitude);
+          }, 100);
+
+          // Bind Slider Actions globally
+          window.changeSlide = (n) => {
+            const slides = document.querySelectorAll('.gallery-slide');
+            const dots = document.querySelectorAll('.dot');
+            slides[currentSlide].style.display = 'none';
+            dots[currentSlide].classList.remove('active');
+
+            currentSlide = (currentSlide + n + slides.length) % slides.length;
+
+            slides[currentSlide].style.display = 'block';
+            dots[currentSlide].classList.add('active');
+          };
+
+          window.setSlide = (n) => {
+            const slides = document.querySelectorAll('.gallery-slide');
+            const dots = document.querySelectorAll('.dot');
+            slides[currentSlide].style.display = 'none';
+            dots[currentSlide].classList.remove('active');
+
+            currentSlide = n;
+
+            slides[currentSlide].style.display = 'block';
+            dots[currentSlide].classList.add('active');
+          };
+
+          // Bind Reveal Phone buttons
+          document.querySelectorAll('.reveal-phone-trigger').forEach((btn) => {
+            btn.addEventListener('click', async () => {
+              const type = btn.getAttribute('data-type');
+              await handleContactReveal(btn, type);
+            });
+          });
+        }
+      } catch (err) {
+        container.innerHTML = `
+          <div class="info-card text-center" style="padding:60px 0;">
+            <span style="font-size:48px;">❌</span>
+            <h3 class="mt-20">Listing Not Found</h3>
+            <p class="text-muted mt-10">This listing might have been deleted, paused, or suspended by moderators.</p>
+            <a href="/pages/search.html" class="btn btn-primary mt-20">Back to Search</a>
+          </div>
+        `;
+      }
+    }
+
+    // ==========================================
+    // LEAFLET MAP DRAWING
+    // ==========================================
+    function initLeafletDetailMap(lat, lng) {
+      const center = [parseFloat(lat), parseFloat(lng)];
+      const mapDetail = L.map('approx-map', {
+        zoomControl: false,
+        dragging: false,
+        touchZoom: false,
+        scrollWheelZoom: false
+      }).setView(center, 14);
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapDetail);
+
+      // Add obfuscated circle zone (radius 250m)
+      L.circle(center, {
+        color: 'var(--primary)',
+        fillColor: 'var(--primary)',
+        fillOpacity: 0.15,
+        radius: 250
+      }).addTo(mapDetail);
+    }
+
+    // ==========================================
+    // CONTACT REVEAL LOGIC
+    // ==========================================
+    async function handleContactReveal(button, contactType) {
+      if (!Session.isAuthenticated()) {
+        UI.showToast('Please log in to contact property owners.', 'warning');
+        setTimeout(() => {
+          window.location.href = `/pages/login.html?redirect=${encodeURIComponent(window.location.href)}`;
+        }, 1500);
+        return;
+      }
+
+      button.disabled = true;
+      button.innerText = 'Revealing...';
+
+      try {
+        // Trigger reveal endpoints
+        const res = await client.post(`listings/${propertyId}/reveal-contact`, { contactType });
+        if (res.success) {
+          const phone = res.data.phoneNumber;
+          const name = res.data.ownerName;
+
+          UI.showToast(`Owner Details Revealed: ${name}`, 'success');
+
+          // Replace button styling and bind redirect links
+          if (contactType === 'call') {
+            button.innerHTML = `📞 Call ${phone}`;
+            button.style.backgroundColor = 'var(--success)';
+            button.disabled = false;
+            button.onclick = () => window.open(`tel:${phone}`);
+            window.open(`tel:${phone}`); // Trigger call link
+          } else {
+            button.innerHTML = `💬 Chat: ${phone}`;
+            button.style.backgroundColor = '#25D366'; // WhatsApp Green
+            button.disabled = false;
+            // Clean phone string for WhatsApp API format
+            const cleanPhone = phone.replace(/[^0-9]/g, '');
+            button.onclick = () => window.open(`https://wa.me/${cleanPhone}`);
+            window.open(`https://wa.me/${cleanPhone}`);
+          }
+        }
+      } catch (err) {
+        UI.showToast(err.message || 'Verification reveal failed.', 'error');
+        button.disabled = false;
+        button.innerText = contactType === 'call' ? '📞 Call Owner' : '💬 WhatsApp';
+      }
+    }
+
+    // ==========================================
+    // REPORT MODAL CONTROL
+    // ==========================================
+    window.openReportModal = () => {
+      if (!Session.isAuthenticated()) {
+        UI.showToast('Please log in as a renter to report listings.', 'warning');
+        return;
+      }
+      UI.openModal('report-modal');
+    };
+
+    window.closeReportModal = () => {
+      UI.closeModal('report-modal');
+    };
+
+    const reportForm = document.getElementById('report-form');
+    reportForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const submitBtn = document.getElementById('submit-report-btn');
+      submitBtn.disabled = true;
+      submitBtn.innerText = 'Submitting report...';
+
+      const payload = {
+        category: document.getElementById('report-category').value,
+        comment: document.getElementById('report-comment').value.trim()
+      };
+
+      try {
+        const res = await client.post(`listings/${propertyId}/reports`, payload);
+        if (res.success) {
+          UI.showToast('Advertisement reported successfully. Our administration will review.', 'success');
+          closeReportModal();
+          reportForm.reset();
+        }
+      } catch (err) {
+        UI.showToast(err.message || 'Failed to submit report.', 'error');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerText = 'Submit Report';
+      }
+    });
+  </script>
+</body>
+</html>

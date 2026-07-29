@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Browse Listings — AnnexLK</title>
+  
+  <link rel="stylesheet" href="/assets/css/variables.css">
+  <link rel="stylesheet" href="/assets/css/base.css">
+  <link rel="stylesheet" href="/assets/css/layout.css">
+  <link rel="stylesheet" href="/assets/css/components.css">
+  <link rel="stylesheet" href="/assets/css/forms.css">
+  <link rel="stylesheet" href="/assets/css/responsive.css">
+  
+  <!-- Leaflet CSS & JS (OpenStreetMap engine - Free, no keys required) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <style>
+    .search-layout {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 30px;
+    }
+    .filters-sidebar {
+      background-color: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      position: sticky;
+      top: 92px;
+      height: calc(100vh - 130px);
+      overflow-y: auto;
+    }
+    .search-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      background-color: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+    }
+    /* Map layout toggle */
+    .view-toggle {
+      display: flex;
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+    }
+    .toggle-option {
+      padding: 8px 16px;
+      background-color: var(--surface);
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 13px;
+      user-select: none;
+      transition: all var(--transition-fast);
+    }
+    .toggle-option.active {
+      background-color: var(--primary);
+      color: white;
+    }
+    .results-map-container {
+      display: grid;
+      grid-template-columns: 1fr;
+      position: relative;
+    }
+    #map-search-view {
+      height: 600px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--surface-border);
+      margin-bottom: 30px;
+    }
+    .leaflet-container {
+      font-family: var(--font-sans);
+    }
+  </style>
+</head>
+<body>
+
+  <header id="app-header"></header>
+
+  <main class="main-layout">
+    <div class="container">
+      <div class="search-layout">
+        
+        <!-- Filters Sidebar (Desktop) -->
+        <aside class="filters-sidebar hide-mobile">
+          <h3 class="mb-20">Refine Search</h3>
+          
+          <form id="filter-form">
+            <!-- Keyword search -->
+            <div class="form-group">
+              <label class="form-label">Keyword</label>
+              <input type="text" id="filter-keyword" class="form-control" placeholder="WiFi, AC, Boarding...">
+            </div>
+
+            <!-- City search -->
+            <div class="form-group">
+              <label class="form-label">Select City</label>
+              <select id="filter-city" class="form-control">
+                <option value="">All Cities</option>
+                <option value="1">Colombo 03</option>
+                <option value="2">Colombo 07</option>
+                <option value="3">Moratuwa</option>
+                <option value="4">Kelaniya</option>
+                <option value="5">Nugegoda</option>
+                <option value="6">Peradeniya</option>
+              </select>
+            </div>
+
+            <!-- University filter -->
+            <div class="form-group">
+              <label class="form-label">Near University</label>
+              <select id="filter-university" class="form-control">
+                <option value="">Select University</option>
+                <option value="1">University of Moratuwa</option>
+                <option value="2">University of Colombo</option>
+                <option value="3">University of Kelaniya</option>
+                <option value="4">University of Sri Jayewardenepura</option>
+                <option value="5">University of Peradeniya</option>
+              </select>
+            </div>
+
+            <!-- Proximity Distance -->
+            <div class="form-group">
+              <label class="form-label">Max Distance Proximity</label>
+              <select id="filter-distance" class="form-control">
+                <option value="2">Within 2 km</option>
+                <option value="5" selected>Within 5 km</option>
+                <option value="10">Within 10 km</option>
+              </select>
+            </div>
+
+            <!-- Property Type -->
+            <div class="form-group">
+              <label class="form-label">Property Type</label>
+              <select id="filter-type" class="form-control">
+                <option value="">Any Property Type</option>
+                <option value="boarding_room">Boarding Room</option>
+                <option value="shared_room">Shared Room</option>
+                <option value="annex">Annex</option>
+                <option value="house">House</option>
+                <option value="apartment">Apartment</option>
+              </select>
+            </div>
+
+            <!-- Rent Range -->
+            <div class="form-group">
+              <label class="form-label">Monthly Rent Range (LKR)</label>
+              <div class="flex gap-10">
+                <input type="number" id="filter-min-rent" class="form-control" placeholder="Min" style="padding: 8px;">
+                <input type="number" id="filter-max-rent" class="form-control" placeholder="Max" style="padding: 8px;">
+              </div>
+            </div>
+
+            <!-- Verified check -->
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input type="checkbox" id="filter-verified" class="checkbox-control">
+                <span>Verified Owners Only</span>
+              </label>
+            </div>
+
+            <!-- Facilities checklist -->
+            <div class="form-group">
+              <label class="form-label">Required Facilities</label>
+              <div style="display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto; padding: 4px;">
+                <label class="checkbox-label"><input type="checkbox" value="5" class="checkbox-control facility-checkbox"> <span>Wi-Fi / Internet</span></label>
+                <label class="checkbox-label"><input type="checkbox" value="1" class="checkbox-control facility-checkbox"> <span>Attached Bathroom</span></label>
+                <label class="checkbox-label"><input type="checkbox" value="4" class="checkbox-control facility-checkbox"> <span>Cooking Allowed</span></label>
+                <label class="checkbox-label"><input type="checkbox" value="10" class="checkbox-control facility-checkbox"> <span>Air Conditioning</span></label>
+                <label class="checkbox-label"><input type="checkbox" value="11" class="checkbox-control facility-checkbox"> <span>Parking Slot</span></label>
+                <label class="checkbox-label"><input type="checkbox" value="15" class="checkbox-control facility-checkbox"> <span>Separate Entrance</span></label>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%;">Apply Filters</button>
+            <button type="button" id="reset-filters" class="btn btn-outline" style="width: 100%; margin-top: 10px;">Reset</button>
+          </form>
+        </aside>
+
+        <!-- Search Results View -->
+        <section class="results-container">
+          
+          <!-- Search Header toolbar -->
+          <div class="search-header">
+            <div>
+              <span id="results-count" style="font-weight: 700; font-size: 18px;">Finding listings...</span>
+            </div>
+            
+            <div class="flex gap-20 align-center">
+              <!-- Sort selection -->
+              <select id="sort-select" class="form-control" style="width: 150px; padding: 6px 12px; border-radius: var(--radius-sm);">
+                <option value="best_match">Best Match</option>
+                <option value="newest">Newest</option>
+                <option value="lowest_rent">Rent: Low to High</option>
+                <option value="highest_rent">Rent: High to Low</option>
+              </select>
+
+              <!-- View toggles -->
+              <div class="view-toggle">
+                <div class="toggle-option active" id="list-view-btn">List</div>
+                <div class="toggle-option" id="map-view-btn">Map</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Empty State -->
+          <div id="empty-state" class="hidden text-center" style="padding: 60px 20px;">
+            <span style="font-size: 48px;">🔍</span>
+            <h3 class="mt-20">No Listings Match Your Filters</h3>
+            <p class="text-muted mt-10">Try clearing filters or adjusting your rent ranges and location filters.</p>
+          </div>
+
+          <!-- Map search container -->
+          <div id="map-view-container" class="hidden">
+            <div id="map-search-view"></div>
+          </div>
+
+          <!-- Listings card grid -->
+          <div class="listing-grid" id="listings-grid">
+            <!-- Dynamic listing card components loaded here -->
+          </div>
+
+          <!-- Pagination container -->
+          <div id="pagination" class="flex justify-between align-center mt-40" style="padding-top: 20px; border-top: 1px solid var(--surface-border);">
+            <button id="prev-page-btn" class="btn btn-outline" style="padding: 8px 16px;">&laquo; Previous</button>
+            <span id="page-num-label" style="font-weight: 600; font-size: 14px;">Page 1 of 1</span>
+            <button id="next-page-btn" class="btn btn-outline" style="padding: 8px 16px;">Next &raquo;</button>
+          </div>
+
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <footer id="app-footer"></footer>
+
+  <script type="module">
+    import Navigation from '/assets/js/utils/navigation.js';
+    import client from '/assets/js/api/client.js';
+    import UI from '/assets/js/components/ui.js';
+    import Session from '/assets/js/state/session.js';
+    import CONFIG from '/assets/js/config.js';
+
+    let map = null;
+    let mapMarkers = [];
+    let currentView = 'list'; // 'list' or 'map'
+    let currentPage = 1;
+    let listingsData = [];
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      Navigation.init();
+      
+      // Parse URL Query Params on start
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('cityId')) document.getElementById('filter-city').value = urlParams.get('cityId');
+      if (urlParams.get('propertyType')) document.getElementById('filter-type').value = urlParams.get('propertyType');
+      if (urlParams.get('maxRent')) document.getElementById('filter-max-rent').value = urlParams.get('maxRent');
+      if (urlParams.get('universityId')) document.getElementById('filter-university').value = urlParams.get('universityId');
+
+      await fetchListings();
+
+      // Bind Filter submits
+      const filterForm = document.getElementById('filter-form');
+      filterForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        currentPage = 1;
+        fetchListings();
+      });
+
+      // Reset filters
+      document.getElementById('reset-filters').addEventListener('click', () => {
+        filterForm.reset();
+        document.querySelectorAll('.facility-checkbox').forEach(cb => cb.checked = false);
+        currentPage = 1;
+        fetchListings();
+      });
+
+      // Bind View toggles
+      const listBtn = document.getElementById('list-view-btn');
+      const mapBtn = document.getElementById('map-view-btn');
+      const gridContainer = document.getElementById('listings-grid');
+      const mapContainer = document.getElementById('map-view-container');
+
+      listBtn.addEventListener('click', () => {
+        listBtn.classList.add('active');
+        mapBtn.classList.remove('active');
+        gridContainer.classList.remove('hidden');
+        mapContainer.classList.add('hidden');
+        currentView = 'list';
+      });
+
+      mapBtn.addEventListener('click', () => {
+        mapBtn.classList.add('active');
+        listBtn.classList.remove('active');
+        gridContainer.classList.add('hidden');
+        mapContainer.classList.remove('hidden');
+        currentView = 'map';
+        
+        // Lazy initialize map on first toggle
+        setTimeout(initLeafletMap, 50);
+      });
+
+      // Bind sort changes
+      document.getElementById('sort-select').addEventListener('change', () => {
+        currentPage = 1;
+        fetchListings();
+      });
+
+      // Bind pagination actions
+      document.getElementById('prev-page-btn').addEventListener('click', () => {
+        if (currentPage > 1) {
+          currentPage--;
+          fetchListings();
+        }
+      });
+      document.getElementById('next-page-btn').addEventListener('click', () => {
+        currentPage++;
+        fetchListings();
+      });
+    });
+
+    /**
+     * Query API search endpoints dynamically.
+     */
+    async function fetchListings() {
+      const grid = document.getElementById('listings-grid');
+      grid.innerHTML = Array(6).fill(`<div class="skeleton skeleton-img" style="height: 300px;"></div>`).join('');
+      
+      const params = new URLSearchParams();
+      params.append('page', currentPage);
+      params.append('limit', 20);
+      
+      // Map filters
+      const keyword = document.getElementById('filter-keyword').value.trim();
+      const city = document.getElementById('filter-city').value;
+      const type = document.getElementById('filter-type').value;
+      const minRent = document.getElementById('filter-min-rent').value;
+      const maxRent = document.getElementById('filter-max-rent').value;
+      const university = document.getElementById('filter-university').value;
+      const distance = document.getElementById('filter-distance').value;
+      const verified = document.getElementById('filter-verified').checked;
+      const sortBy = document.getElementById('sort-select').value;
+
+      if (keyword) params.append('keyword', keyword);
+      if (city) params.append('cityId', city);
+      if (type) params.append('propertyType', type);
+      if (minRent) params.append('minRent', minRent);
+      if (maxRent) params.append('maxRent', maxRent);
+      if (university) {
+        params.append('universityId', university);
+        params.append('universityDistance', distance);
+      }
+      if (verified) params.append('verifiedOwner', 'true');
+      params.append('sortBy', sortBy);
+
+      // Collect facilities checkboxes
+      const facilityIds = [];
+      document.querySelectorAll('.facility-checkbox:checked').forEach((cb) => {
+        facilityIds.push(parseInt(cb.value, 10));
+      });
+      if (facilityIds.length > 0) {
+        // Joi checks arrays passed in query
+        facilityIds.forEach(id => params.append('facilityIds', id));
+      }
+
+      try {
+        const res = await client.get(`search?${params.toString()}`);
+        if (res.success) {
+          listingsData = res.data;
+          renderListings(listingsData);
+          updatePaginationUI(res.meta.pagination);
+
+          // Update Map view markers if initialized
+          if (map) {
+            updateMapMarkers(listingsData);
+          }
+        }
+      } catch (err) {
+        UI.showToast('Search execution failed: ' + err.message, 'error');
+      }
+    }
+
+    /**
+     * Build HTML cards dynamic rendering.
+     */
+    function renderListings(listings) {
+      const grid = document.getElementById('listings-grid');
+      const empty = document.getElementById('empty-state');
+      const countLabel = document.getElementById('results-count');
+
+      countLabel.innerText = `${listings.length} Property Listing(s) Found`;
+
+      if (listings.length === 0) {
+        grid.innerHTML = '';
+        empty.classList.remove('hidden');
+        return;
+      }
+
+      empty.classList.add('hidden');
+      
+      grid.innerHTML = listings.map((p) => {
+        const mainThumbnail = p.main_thumbnail || 'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=400&q=70'; // fallback gorgeous design
+        
+        let kycBadge = '';
+        if (p.owner_kyc_status === 'IDENTITY_VERIFIED' || p.owner_kyc_status === 'TRUSTED_OWNER') {
+          kycBadge = `<span class="badge badge-verify" title="Verified Owner Identity">🛡️ Verified</span>`;
+        }
+
+        const isFav = Session.isAuthenticated() && localStorage.getItem(`fav-${p.id}`) === 'true';
+
+        return `
+          <div class="listing-card">
+            <div class="card-img-container">
+              <img src="${mainThumbnail}" class="card-img" alt="${p.title}" loading="lazy">
+              
+              <button class="fav-btn ${isFav ? 'active' : ''}" data-id="${p.id}" title="Save Favourite">
+                ❤️
+              </button>
+
+              <div class="card-badge-container">
+                <span class="badge badge-secondary">${p.property_type.replace('_', ' ')}</span>
+                ${kycBadge}
+              </div>
+            </div>
+            
+            <div class="card-content">
+              <div class="card-price">${parseFloat(p.rent).toLocaleString()} LKR<span> / month</span></div>
+              <a href="/pages/listing.html?slug=${p.slug}" class="card-title">${p.title}</a>
+              
+              <div class="card-location">
+                <span>📍</span> ${p.address_text || p.city_name}
+              </div>
+              
+              <div class="card-meta">
+                <span>🛏️ Occupants: ${p.current_occupants}/${p.max_occupants}</span>
+                <span>📅 Available: ${p.available_date.substring(0, 10)}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Bind Favourites action listeners
+      grid.querySelectorAll('.fav-btn').forEach((btn) => {
+        btn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          const propertyId = btn.getAttribute('data-id');
+          await toggleFavourite(btn, propertyId);
+        });
+      });
+    }
+
+    async function toggleFavourite(button, propertyId) {
+      if (!Session.isAuthenticated()) {
+        UI.showToast('Please log in as a renter to save favourites.', 'warning');
+        return;
+      }
+
+      const active = button.classList.contains('active');
+      try {
+        if (active) {
+          const res = await client.delete(`favourites/${propertyId}`);
+          if (res.success) {
+            button.classList.remove('active');
+            localStorage.removeItem(`fav-${propertyId}`);
+            UI.showToast('Removed from favourites.', 'success');
+          }
+        } else {
+          const res = await client.post(`favourites/${propertyId}`);
+          if (res.success) {
+            button.classList.add('active');
+            localStorage.setItem(`fav-${propertyId}`, 'true');
+            UI.showToast('Added to favourites!', 'success');
+          }
+        }
+      } catch (err) {
+        UI.showToast(err.message || 'Operation failed.', 'error');
+      }
+    }
+
+    function updatePaginationUI(pageInfo) {
+      const label = document.getElementById('page-num-label');
+      const prevBtn = document.getElementById('prev-page-btn');
+      const nextBtn = document.getElementById('next-page-btn');
+
+      label.innerText = `Page ${pageInfo.page} of ${pageInfo.totalPages || 1}`;
+      
+      prevBtn.disabled = pageInfo.page <= 1;
+      nextBtn.disabled = pageInfo.page >= pageInfo.totalPages;
+    }
+
+    // ==========================================
+    // MAP INTEGRATION VIEW (Leaflet OSMap)
+    // ==========================================
+    function initLeafletMap() {
+      if (map) return; // Already loaded
+
+      // Default Colombo Center
+      map = L.map('map-search-view').setView([CONFIG.DEFAULT_MAP_CENTER.lat, CONFIG.DEFAULT_MAP_CENTER.lng], 12);
+
+      // Load street map tiles from OpenStreetMap contributors
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      }).addTo(map);
+
+      updateMapMarkers(listingsData);
+    }
+
+    function updateMapMarkers(listings) {
+      if (!map) return;
+
+      // Clear existing markers
+      mapMarkers.forEach(m => map.removeLayer(m));
+      mapMarkers = [];
+
+      if (listings.length === 0) return;
+
+      const group = [];
+
+      listings.forEach((p) => {
+        if (p.approx_latitude && p.approx_longitude) {
+          const center = [parseFloat(p.approx_latitude), parseFloat(p.approx_longitude)];
+          
+          // Draw privacy circular zone (radius 250m) instead of exact marker
+          const circle = L.circle(center, {
+            color: 'var(--primary)',
+            fillColor: 'var(--primary)',
+            fillOpacity: 0.15,
+            radius: 250 // 250 meters privacy radius
+          }).addTo(map);
+
+          // Bind Popup details
+          circle.bindPopup(`
+            <div style="font-family: var(--font-sans); width: 180px;">
+              <strong style="display:block; margin-bottom: 4px; font-size: 13px;">${p.title}</strong>
+              <span style="color:var(--primary); font-weight:700; font-size:14px;">${parseFloat(p.rent).toLocaleString()} LKR</span>
+              <p style="font-size:11px; color:var(--text-muted); margin-top:4px;">📍 Approximate Location</p>
+              <a href="/pages/listing.html?slug=${p.slug}" style="display:block; margin-top:8px; font-weight:600; color:var(--secondary); font-size:12px;">View Details &raquo;</a>
+            </div>
+          `);
+
+          mapMarkers.push(circle);
+          group.push(center);
+        }
+      });
+
+      // Fit map boundary viewport to include all markers
+      if (group.length > 0) {
+        map.fitBounds(L.latLngBounds(group), { padding: [30, 30] });
+      }
+    }
+  </script>
+</body>
+</html>

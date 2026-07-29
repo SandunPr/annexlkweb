@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Owner Dashboard — AnnexLK</title>
+  
+  <link rel="stylesheet" href="/assets/css/variables.css">
+  <link rel="stylesheet" href="/assets/css/base.css">
+  <link rel="stylesheet" href="/assets/css/layout.css">
+  <link rel="stylesheet" href="/assets/css/components.css">
+  <link rel="stylesheet" href="/assets/css/forms.css">
+  <link rel="stylesheet" href="/assets/css/responsive.css">
+  
+  <style>
+    .metrics-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+    .metric-card {
+      background-color: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      text-align: center;
+      box-shadow: var(--shadow-sm);
+    }
+    .metric-number {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+    
+    /* Listing management row in dashboard */
+    .manage-list-item {
+      background-color: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      margin-bottom: 20px;
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .manage-thumb {
+      width: 120px;
+      height: 90px;
+      object-fit: cover;
+      border-radius: var(--radius-sm);
+      background-color: var(--background);
+    }
+    
+    .manage-details {
+      flex-grow: 1;
+    }
+
+    .manage-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-width: 180px;
+    }
+  </style>
+</head>
+<body>
+
+  <header id="app-header"></header>
+
+  <main class="main-layout">
+    <div class="container">
+      <div class="grid dashboard-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="dashboard-sidebar">
+          <div class="profile-card" style="padding: 20px; text-align: center; margin-bottom: 20px;">
+            <div style="font-size: 64px; margin-bottom: 12px;">🏠</div>
+            <h3 id="sidebar-name">Loading...</h3>
+            <span class="badge badge-success mt-10">Property Owner</span>
+          </div>
+          
+          <div class="nav-links flex flex-col gap-10">
+            <a href="/pages/profile.html" class="nav-link">👤 My Profile Details</a>
+            <a href="/pages/owner-dashboard.html" class="nav-link active">📊 Owner Dashboard</a>
+            <a href="/pages/create-listing.html" class="btn btn-primary" style="margin-top: 15px;">➕ Create Listing</a>
+          </div>
+        </aside>
+        
+        <!-- Main Content Area -->
+        <section class="dashboard-content">
+          <!-- KYC Warning banner -->
+          <div id="kyc-warning-banner" class="switch-container hidden" style="background-color: var(--warning-light); border-color: var(--warning); margin-bottom: 30px;">
+            <div>
+              <strong class="text-secondary">KYC Verification Required</strong>
+              <p class="text-muted" style="font-size: 13px;">You must complete identity document KYC verification before you can publish property listings.</p>
+            </div>
+            <a href="/pages/kyc.html" class="btn btn-secondary">Submit KYC</a>
+          </div>
+
+          <h2 class="mb-20">My Listings Performance</h2>
+
+          <!-- Metric Cards -->
+          <div class="metrics-row" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
+            <div class="metric-card">
+              <div class="metric-number" id="stats-total">0</div>
+              <div class="text-muted" style="font-size: 13px;">Total Listings</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-number" id="stats-active" style="color: var(--success);">0</div>
+              <div class="text-muted" style="font-size: 13px;">Active Listings</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-number" id="stats-views" style="color: #6366F1;">0</div>
+              <div class="text-muted" style="font-size: 13px;">Total Views</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-number" id="stats-clicks" style="color: var(--secondary);">0</div>
+              <div class="text-muted" style="font-size: 13px;">Owner Contacts</div>
+            </div>
+          </div>
+
+          <div class="flex justify-between align-center mb-20">
+            <h2>Manage Properties</h2>
+            <a href="/pages/create-listing.html" class="btn btn-primary">➕ Add Property</a>
+          </div>
+
+          <!-- Empty state -->
+          <div id="empty-state" class="hidden text-center" style="background-color: var(--surface); padding: 50px 20px; border-radius: var(--radius-md); border: 1px solid var(--surface-border);">
+            <span style="font-size: 48px;">🏡</span>
+            <h3 class="mt-20">No Properties Registered Yet</h3>
+            <p class="text-muted mt-10">Click Add Property to create your first rental boarding house or annex listing.</p>
+            <a href="/pages/create-listing.html" class="btn btn-primary mt-20">Create First Listing</a>
+          </div>
+
+          <!-- Listings queue -->
+          <div id="listings-queue">
+            <!-- Loading Skeleton -->
+            <div class="skeleton" style="height: 100px; margin-bottom: 20px; border-radius: var(--radius-md);"></div>
+            <div class="skeleton" style="height: 100px; margin-bottom: 20px; border-radius: var(--radius-md);"></div>
+          </div>
+
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <footer id="app-footer"></footer>
+
+  <script type="module">
+    import Navigation from '/assets/js/utils/navigation.js';
+    import client from '/assets/js/api/client.js';
+    import UI from '/assets/js/components/ui.js';
+    import Session from '/assets/js/state/session.js';
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      Navigation.init();
+
+      // Guard check
+      if (!Session.isAuthenticated()) {
+        window.location.href = '/pages/login.html';
+        return;
+      }
+      
+      const user = Session.getUser();
+      if (user.role !== 'PROPERTY_OWNER') {
+        window.location.href = '/index.html';
+        return;
+      }
+
+      document.getElementById('sidebar-name').innerText = user.full_name || 'Owner Profile';
+
+      // Load KYC status to verify Banner
+      try {
+        const kycRes = await client.get('kyc/status');
+        if (kycRes.success && kycRes.data.status !== 'APPROVED') {
+          document.getElementById('kyc-warning-banner').classList.remove('hidden');
+        }
+      } catch (err) {}
+
+      await loadOwnerDashboard();
+    });
+
+    async function loadOwnerDashboard() {
+      const queue = document.getElementById('listings-queue');
+      const empty = document.getElementById('empty-state');
+
+      try {
+        const res = await client.get('listings/owner/my-listings');
+        if (res.success) {
+          const list = res.data;
+          
+          if (list.length === 0) {
+            queue.innerHTML = '';
+            empty.classList.remove('hidden');
+            return;
+          }
+
+          empty.classList.add('hidden');
+
+          // Compute quick totals
+          let active = 0, views = 0, clicks = 0;
+          list.forEach((p) => {
+            views += p.views_count || 0;
+            clicks += p.contact_clicks_count || 0;
+            if (p.status === 'ACTIVE') active++;
+          });
+
+          document.getElementById('stats-total').innerText = list.length;
+          document.getElementById('stats-active').innerText = active;
+          document.getElementById('stats-views').innerText = views.toLocaleString();
+          document.getElementById('stats-clicks').innerText = clicks.toLocaleString();
+
+          // Render listings
+          queue.innerHTML = list.map((p) => {
+            const thumb = p.main_thumbnail || 'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=150&q=70';
+            
+            // Status badges matching
+            let statusBadge = '';
+            if (p.status === 'DRAFT') statusBadge = '<span class="badge badge-primary">Draft</span>';
+            else if (p.status === 'ACTIVE') statusBadge = '<span class="badge badge-success">Active</span>';
+            else if (p.status === 'PENDING_REVIEW') statusBadge = '<span class="badge badge-warning">Pending Review</span>';
+            else if (p.status === 'EXPIRED') statusBadge = '<span class="badge badge-danger">Expired</span>';
+            else if (p.status === 'PAUSED') statusBadge = '<span class="badge">Paused</span>';
+            else if (p.status === 'OCCUPIED') statusBadge = '<span class="badge badge-danger">Occupied</span>';
+            else if (p.status === 'RESERVED') statusBadge = '<span class="badge badge-warning">Reserved</span>';
+            
+            // Confirmation alert checking: if confirm warning (days count since last confirmed)
+            const lastConfirmDate = new Date(p.last_confirmed_at);
+            const daysSinceConfirm = Math.floor((Date.now() - lastConfirmDate) / 1000 / 60 / 60 / 24);
+            
+            let confirmNotice = '';
+            if (daysSinceConfirm >= 14 && p.status === 'ACTIVE') {
+              confirmNotice = `
+                <div style="color: var(--danger); font-size:12px; font-weight:600; margin-top:8px;">
+                  ⚠️ Stale Listing Warning: Stale list score penalty applied. Click Confirm Available to refresh.
+                </div>
+              `;
+            }
+
+            return `
+              <div class="manage-list-item">
+                <img src="${thumb}" class="manage-thumb" alt="${p.title}">
+                
+                <div class="manage-details">
+                  <div class="flex align-center gap-10">
+                    ${statusBadge}
+                    <strong>${parseFloat(p.rent).toLocaleString()} LKR/mo</strong>
+                  </div>
+                  <h3 class="mt-10" style="font-size:16px;">${p.title}</h3>
+                  <div class="text-muted" style="font-size: 12px; margin-top: 6px;">
+                    👁️ Views: ${p.views_count} | ❤️ Favourites: ${p.favourites_count} | 📞 Click Clicks: ${p.contact_clicks_count}
+                  </div>
+                  <div class="text-muted" style="font-size: 11px; margin-top: 4px;">
+                    Last confirmed: ${p.last_confirmed_at ? p.last_confirmed_at.substring(0, 10) : 'Never'} (${daysSinceConfirm} day(s) ago)
+                  </div>
+                  ${confirmNotice}
+                </div>
+
+                <div class="manage-actions">
+                  <!-- Action buttons -->
+                  <div class="flex gap-10">
+                    <button class="btn btn-primary confirm-btn" style="flex:1; padding: 6px; font-size: 11px;" data-id="${p.id}" title="Confirm availability to keep ranking high">Confirm Available</button>
+                    <a href="/pages/edit-listing.html?id=${p.id}" class="btn btn-outline" style="padding: 6px 12px; font-size:11px;">Edit</a>
+                  </div>
+                  
+                  <div class="flex gap-10">
+                    <select class="form-control status-select" style="flex:1; padding: 6px; font-size:11px; height: 32px;" data-id="${p.id}">
+                      <option value="" disabled selected>Change Status</option>
+                      <option value="ACTIVE" ${p.status === 'ACTIVE' ? 'disabled' : ''}>Mark Active</option>
+                      <option value="PAUSED" ${p.status === 'PAUSED' ? 'disabled' : ''}>Pause Listing</option>
+                      <option value="RESERVED" ${p.status === 'RESERVED' ? 'disabled' : ''}>Mark Reserved</option>
+                      <option value="OCCUPIED" ${p.status === 'OCCUPIED' ? 'disabled' : ''}>Mark Occupied</option>
+                    </select>
+                    
+                    <button class="btn btn-outline delete-btn" style="padding:6px 10px; color:var(--danger); border-color: rgba(239, 68, 68, 0.2);" data-id="${p.id}" title="Delete Listing">🗑️</button>
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('');
+
+          // Bind Action events
+          bindActions();
+        }
+      } catch (err) {
+        UI.showToast('Failed to load owner listings dashboard: ' + err.message, 'error');
+      }
+    }
+
+    function bindActions() {
+      // 1. Confirm availability
+      document.querySelectorAll('.confirm-btn').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const id = btn.getAttribute('data-id');
+          btn.disabled = true;
+          btn.innerText = 'Confirming...';
+          try {
+            const res = await client.post(`listings/${id}/confirm-availability`);
+            if (res.success) {
+              UI.showToast('Listing availability confirmed!', 'success');
+              await loadOwnerDashboard();
+            }
+          } catch (err) {
+            UI.showToast(err.message, 'error');
+            btn.disabled = false;
+            btn.innerText = 'Confirm Available';
+          }
+        });
+      });
+
+      // 2. Delete Listing
+      document.querySelectorAll('.delete-btn').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const id = btn.getAttribute('data-id');
+          if (confirm('Are you sure you want to delete this listing? This action deletes all files and cannot be undone.')) {
+            try {
+              const res = await client.delete(`listings/${id}`);
+              if (res.success) {
+                UI.showToast('Listing deleted successfully.', 'success');
+                await loadOwnerDashboard();
+              }
+            } catch (err) {
+              UI.showToast(err.message, 'error');
+            }
+          }
+        });
+      });
+
+      // 3. Status Select Toggle
+      document.querySelectorAll('.status-select').forEach((select) => {
+        select.addEventListener('change', async () => {
+          const id = select.getAttribute('data-id');
+          const value = select.value;
+          if (!value) return;
+
+          try {
+            let endpoint = '';
+            if (value === 'ACTIVE') endpoint = `listings/${id}/confirm-availability`; // sets active
+            else if (value === 'PAUSED') endpoint = `listings/${id}/pause`;
+            else if (value === 'RESERVED') endpoint = `listings/${id}/mark-reserved`;
+            else if (value === 'OCCUPIED') endpoint = `listings/${id}/mark-occupied`;
+
+            const res = await client.post(endpoint);
+            if (res.success) {
+              UI.showToast(`Listing status updated to ${value.toLowerCase()}`, 'success');
+              await loadOwnerDashboard();
+            }
+          } catch (err) {
+            UI.showToast(err.message || 'Failed to update status.', 'error');
+          }
+        });
+      });
+    }
+  </script>
+</body>
+</html>

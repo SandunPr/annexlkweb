@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Property Listing — AnnexLK</title>
+  
+  <link rel="stylesheet" href="/assets/css/variables.css">
+  <link rel="stylesheet" href="/assets/css/base.css">
+  <link rel="stylesheet" href="/assets/css/layout.css">
+  <link rel="stylesheet" href="/assets/css/components.css">
+  <link rel="stylesheet" href="/assets/css/forms.css">
+  <link rel="stylesheet" href="/assets/css/responsive.css">
+  
+  <style>
+    .form-container {
+      max-width: 800px;
+      margin: 40px auto;
+      background-color: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius-lg);
+      padding: 40px;
+      box-shadow: var(--shadow-lg);
+    }
+    
+    .file-input-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+    
+    .file-upload-block {
+      border: 2px dashed var(--surface-border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      text-align: center;
+      cursor: pointer;
+      position: relative;
+      background-color: var(--background);
+      transition: all var(--transition-fast);
+      height: 140px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .file-upload-block:hover {
+      border-color: var(--primary);
+    }
+    
+    .file-upload-block input[type="file"] {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+    }
+    
+    .upload-label {
+      font-size: 13px;
+      font-weight: 600;
+      margin-top: 8px;
+    }
+    
+    .preview-text {
+      font-size: 11px;
+      color: var(--success);
+      margin-top: 4px;
+      word-break: break-all;
+    }
+  </style>
+</head>
+<body>
+
+  <header id="app-header"></header>
+
+  <main class="main-layout">
+    <div class="container">
+      <div class="form-container">
+        <h2 class="mb-10 text-center">Add New Rental Listing</h2>
+        <p class="text-muted text-center mb-30" style="font-size: 14px;">Fill in coordinates, pricing, facilities, and upload exactly 3 images to publish your space.</p>
+        
+        <form id="create-listing-form">
+          
+          <h3 class="mb-15 pb-10" style="border-bottom:1px solid var(--surface-border); font-size:16px;">Core Details</h3>
+
+          <div class="form-group">
+            <label for="title" class="form-label">Property Title</label>
+            <input type="text" id="title" class="form-control" placeholder="e.g. Spacious Single Room in Moratuwa" required>
+          </div>
+
+          <div class="form-group">
+            <label for="description" class="form-label">Detailed Description</label>
+            <textarea id="description" class="form-control" placeholder="Write about house policies, surrounding areas, and tenant preferences..." required></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="propertyType" class="form-label">Property Type</label>
+              <select id="propertyType" class="form-control" required>
+                <option value="boarding_room">Boarding Room</option>
+                <option value="shared_room">Shared Room</option>
+                <option value="annex">Annex</option>
+                <option value="house">House</option>
+                <option value="apartment">Apartment</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="availableDate" class="form-label">Available From Date</label>
+              <input type="date" id="availableDate" class="form-control" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="maxOccupants" class="form-label">Max Occupants Capacity</label>
+              <input type="number" id="maxOccupants" class="form-control" value="1" min="1" required>
+            </div>
+            
+            <div class="form-group">
+              <label for="currentOccupants" class="form-label">Current Occupants Count</label>
+              <input type="number" id="currentOccupants" class="form-control" value="0" min="0" required>
+            </div>
+          </div>
+
+          <h3 class="mb-15 pb-10 mt-20" style="border-bottom:1px solid var(--surface-border); font-size:16px;">Pricing & Terms</h3>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="rent" class="form-label">Monthly Rent Amount (LKR)</label>
+              <input type="number" id="rent" class="form-control" placeholder="e.g. 15000" min="1" required>
+            </div>
+            
+            <div class="form-group">
+              <label for="deposit" class="form-label">Refundable Security Deposit (LKR)</label>
+              <input type="number" id="deposit" class="form-control" placeholder="e.g. 30000" min="0" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="advanceMonths" class="form-label">Advance Payment (Months)</label>
+              <input type="number" id="advanceMonths" class="form-control" value="1" min="0" required>
+            </div>
+            
+            <div class="form-group" style="display: flex; align-items: flex-end; padding-bottom: 8px;">
+              <label class="checkbox-label">
+                <input type="checkbox" id="billsIncluded" class="checkbox-control">
+                <span>Utility Bills Included in Rent</span>
+              </label>
+            </div>
+          </div>
+
+          <h3 class="mb-15 pb-10 mt-20" style="border-bottom:1px solid var(--surface-border); font-size:16px;">Location Specifications</h3>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="cityId" class="form-label">City Region</label>
+              <select id="cityId" class="form-control" required>
+                <option value="" disabled selected>Choose a City</option>
+                <option value="1">Colombo 03</option>
+                <option value="2">Colombo 07</option>
+                <option value="3">Moratuwa</option>
+                <option value="4">Kelaniya</option>
+                <option value="5">Nugegoda</option>
+                <option value="6">Peradeniya</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="addressText" class="form-label">Street Address / Landmark</label>
+              <input type="text" id="addressText" class="form-control" placeholder="e.g. 15, Katubedda Road, Moratuwa" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="latitude" class="form-label">Latitude Coordinate</label>
+              <input type="number" step="any" id="latitude" class="form-control" required readonly>
+            </div>
+            <div class="form-group">
+              <label for="longitude" class="form-label">Longitude Coordinate</label>
+              <input type="number" step="any" id="longitude" class="form-control" required readonly>
+            </div>
+          </div>
+
+          <h3 class="mb-15 pb-10 mt-20" style="border-bottom:1px solid var(--surface-border); font-size:16px;">Photos Upload (Exactly 3 Required)</h3>
+          <p class="text-muted mb-15" style="font-size:12px;">Provide exactly three photos of the space: one thumbnail/outer photo, one indoor room view, and one bathroom/facility photo.</p>
+
+          <div class="file-input-grid">
+            <div class="file-upload-block">
+              <span style="font-size: 20px;">🖼️</span>
+              <span class="upload-label">Main Image</span>
+              <input type="file" id="img_main" accept="image/jpeg,image/png,image/webp" required>
+              <div class="preview-text hidden" id="preview-main"></div>
+            </div>
+
+            <div class="file-upload-block">
+              <span style="font-size: 20px;">🏠</span>
+              <span class="upload-label">Interior Image</span>
+              <input type="file" id="img_interior" accept="image/jpeg,image/png,image/webp" required>
+              <div class="preview-text hidden" id="preview-interior"></div>
+            </div>
+
+            <div class="file-upload-block">
+              <span style="font-size: 20px;">🛀</span>
+              <span class="upload-label">Facility Image</span>
+              <input type="file" id="img_facility" accept="image/jpeg,image/png,image/webp" required>
+              <div class="preview-text hidden" id="preview-facility"></div>
+            </div>
+          </div>
+
+          <h3 class="mb-15 pb-10 mt-20" style="border-bottom:1px solid var(--surface-border); font-size:16px;">Select Available Facilities</h3>
+          <div class="facilities-grid mb-30">
+            <label class="checkbox-label"><input type="checkbox" value="1" class="checkbox-control facility-check"> <span>Attached Bathroom</span></label>
+            <label class="checkbox-label"><input type="checkbox" value="2" class="checkbox-control facility-check"> <span>Private Balcony</span></label>
+            <label class="checkbox-label"><input type="checkbox" value="3" class="checkbox-control facility-check"> <span>Hot Water</span></label>
+            <label class="checkbox-label"><input type="checkbox" value="4" class="checkbox-control facility-check"> <span>Cooking Allowed</span></label>
+            <label class="checkbox-label"><input type="checkbox" value="5" class="checkbox-control facility-check"> <span>Wi-Fi / Internet</span></label>
+            <label class="checkbox-label"><input type="checkbox" value="6" class="checkbox-control facility-check"> <span>CCTV Protection</span></label>
+            <label class="checkbox-label"><input type="checkbox" value="7" class="checkbox-control facility-check"> <span>Washing Machine</span></label>
+            <label class="checkbox-label"><input type="checkbox" value="8" class="checkbox-control facility-check"> <span>Fridge / Refrigerator</span></label>
+            <label class="checkbox-label"><input type="checkbox" value="9" class="checkbox-control facility-check"> <span>Furnished Room</span></label>
+            <label class="checkbox-label"><input type="checkbox" value="10" class="checkbox-control facility-check"> <span>Air Conditioning</span></label>
+          </div>
+
+          <button type="submit" id="submit-btn" class="btn btn-primary" style="width: 100%; height: 50px; font-size: 15px;">Create Listing (Submit for Review)</button>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <footer id="app-footer"></footer>
+
+  <script type="module">
+    import Navigation from '/assets/js/utils/navigation.js';
+    import client from '/assets/js/api/client.js';
+    import UI from '/assets/js/components/ui.js';
+    import Session from '/assets/js/state/session.js';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      Navigation.init();
+
+      // Guard check
+      if (!Session.isAuthenticated()) {
+        window.location.href = '/pages/login.html';
+        return;
+      }
+      const user = Session.getUser();
+      if (user.role !== 'PROPERTY_OWNER') {
+        window.location.href = '/index.html';
+        return;
+      }
+
+      // Auto coordinates mapping based on selected city
+      const coordinatesMap = {
+        '1': { lat: 6.9113, lng: 79.8497 }, // Col 3
+        '2': { lat: 6.9044, lng: 79.8660 }, // Col 7
+        '3': { lat: 6.7881, lng: 79.8913 }, // Moratuwa
+        '4': { lat: 6.9734, lng: 79.9142 }, // Kelaniya
+        '5': { lat: 6.8744, lng: 79.8912 }, // Nugegoda
+        '6': { lat: 7.2690, lng: 80.5925 }  // Peradeniya
+      };
+
+      const citySelect = document.getElementById('cityId');
+      citySelect.addEventListener('change', () => {
+        const selected = citySelect.value;
+        if (coordinatesMap[selected]) {
+          document.getElementById('latitude').value = coordinatesMap[selected].lat;
+          document.getElementById('longitude').value = coordinatesMap[selected].lng;
+        }
+      });
+
+      // Update upload preview texts
+      const setupPreview = (inputId, previewId) => {
+        const input = document.getElementById(inputId);
+        const preview = document.getElementById(previewId);
+        input.addEventListener('change', () => {
+          if (input.files.length > 0) {
+            preview.innerText = `📄 ${input.files[0].name.substring(0, 15)}...`;
+            preview.classList.remove('hidden');
+          } else {
+            preview.classList.add('hidden');
+          }
+        });
+      };
+
+      setupPreview('img_main', 'preview-main');
+      setupPreview('img_interior', 'preview-interior');
+      setupPreview('img_facility', 'preview-facility');
+
+      // Submit Form
+      const form = document.getElementById('create-listing-form');
+      const submitBtn = document.getElementById('submit-btn');
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        // Enforce exactly 3 files
+        const main = document.getElementById('img_main').files[0];
+        const interior = document.getElementById('img_interior').files[0];
+        const facility = document.getElementById('img_facility').files[0];
+
+        if (!main || !interior || !facility) {
+          UI.showToast('You must select exactly three photos to register the listing.', 'warning');
+          return;
+        }
+
+        const formData = new FormData();
+        formData.append('title', document.getElementById('title').value.trim());
+        formData.append('description', document.getElementById('description').value.trim());
+        formData.append('propertyType', document.getElementById('propertyType').value);
+        formData.append('availableDate', document.getElementById('availableDate').value);
+        formData.append('maxOccupants', parseInt(document.getElementById('maxOccupants').value, 10));
+        formData.append('currentOccupants', parseInt(document.getElementById('currentOccupants').value, 10));
+        formData.append('rent', parseFloat(document.getElementById('rent').value));
+        formData.append('deposit', parseFloat(document.getElementById('deposit').value));
+        formData.append('advanceMonths', parseInt(document.getElementById('advanceMonths').value, 10));
+        formData.append('billsIncluded', document.getElementById('billsIncluded').checked);
+        formData.append('cityId', parseInt(document.getElementById('cityId').value, 10));
+        formData.append('addressText', document.getElementById('addressText').value.trim());
+        formData.append('latitude', parseFloat(document.getElementById('latitude').value));
+        formData.append('longitude', parseFloat(document.getElementById('longitude').value));
+
+        // Append images with matching Multer names
+        formData.append('images', main);
+        formData.append('images', interior);
+        formData.append('images', facility);
+
+        // Gather facilities IDs Joi array formats
+        const facilityIds = [];
+        document.querySelectorAll('.facility-check:checked').forEach((cb) => {
+          facilityIds.push(parseInt(cb.value, 10));
+        });
+        formData.append('facilityIds', JSON.stringify(facilityIds));
+
+        submitBtn.disabled = true;
+        submitBtn.innerText = 'Uploading listing media...';
+
+        try {
+          // Use client wrapper
+          const res = await client.post('listings', formData);
+          if (res.success) {
+            UI.showToast('Listing created successfully! Under administrative review.', 'success');
+            setTimeout(() => {
+              window.location.href = '/pages/owner-dashboard.html';
+            }, 1500);
+          }
+        } catch (err) {
+          UI.showToast(err.message || 'Failed to create listing.', 'error');
+          submitBtn.disabled = false;
+          submitBtn.innerText = 'Create Listing (Submit for Review)';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

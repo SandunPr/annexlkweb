@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Saved Favourites — AnnexLK</title>
+  
+  <link rel="stylesheet" href="/assets/css/variables.css">
+  <link rel="stylesheet" href="/assets/css/base.css">
+  <link rel="stylesheet" href="/assets/css/layout.css">
+  <link rel="stylesheet" href="/assets/css/components.css">
+  <link rel="stylesheet" href="/assets/css/forms.css">
+  <link rel="stylesheet" href="/assets/css/responsive.css">
+</head>
+<body>
+
+  <header id="app-header"></header>
+
+  <main class="main-layout">
+    <div class="container">
+      <div class="grid dashboard-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="dashboard-sidebar">
+          <div class="profile-card" style="padding: 20px; text-align: center; margin-bottom: 20px;">
+            <div style="font-size: 64px; margin-bottom: 12px;">👤</div>
+            <h3 id="sidebar-name">Loading...</h3>
+            <span class="badge badge-primary mt-10">Renter</span>
+          </div>
+          
+          <div class="nav-links flex flex-col gap-10">
+            <a href="/pages/profile.html" class="nav-link">👤 My Profile Details</a>
+            <a href="/pages/favourites.html" class="nav-link active">❤️ Favourites Saved</a>
+          </div>
+        </aside>
+        
+        <!-- Main Content Area -->
+        <section class="dashboard-content">
+          <h2 class="mb-20">My Saved Favourites</h2>
+
+          <!-- Empty state -->
+          <div id="empty-state" class="hidden text-center" style="background-color: var(--surface); padding: 50px 20px; border-radius: var(--radius-md); border: 1px solid var(--surface-border);">
+            <span style="font-size: 48px;">❤️</span>
+            <h3 class="mt-20">No Favourites Saved Yet</h3>
+            <p class="text-muted mt-10">Browse property listings and click the heart button to save listings to this page.</p>
+            <a href="/pages/search.html" class="btn btn-primary mt-20">Browse Listings</a>
+          </div>
+
+          <!-- Listings card grid -->
+          <div class="listing-grid" id="favourites-grid">
+            <!-- Dynamic listing card components loaded here -->
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <footer id="app-footer"></footer>
+
+  <script type="module">
+    import Navigation from '/assets/js/utils/navigation.js';
+    import client from '/assets/js/api/client.js';
+    import UI from '/assets/js/components/ui.js';
+    import Session from '/assets/js/state/session.js';
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      Navigation.init();
+
+      if (!Session.isAuthenticated()) {
+        window.location.href = '/pages/login.html';
+        return;
+      }
+
+      const user = Session.getUser();
+      document.getElementById('sidebar-name').innerText = user.full_name || 'Renter';
+
+      await loadFavourites();
+    });
+
+    async function loadFavourites() {
+      const grid = document.getElementById('favourites-grid');
+      const empty = document.getElementById('empty-state');
+
+      grid.innerHTML = Array(3).fill(`<div class="skeleton skeleton-img" style="height: 300px;"></div>`).join('');
+
+      try {
+        const res = await client.get('favourites');
+        if (res.success) {
+          const list = res.data;
+
+          if (list.length === 0) {
+            grid.innerHTML = '';
+            empty.classList.remove('hidden');
+            return;
+          }
+
+          empty.classList.add('hidden');
+
+          grid.innerHTML = list.map((p) => {
+            const mainThumbnail = p.main_thumbnail || 'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=400&q=70';
+            
+            let kycBadge = '';
+            if (p.owner_kyc_status === 'IDENTITY_VERIFIED' || p.owner_kyc_status === 'TRUSTED_OWNER') {
+              kycBadge = `<span class="badge badge-verify" title="Verified Owner Identity">🛡️ Verified</span>`;
+            }
+
+            return `
+              <div class="listing-card" id="fav-card-${p.id}">
+                <div class="card-img-container">
+                  <img src="${mainThumbnail}" class="card-img" alt="${p.title}" loading="lazy">
+                  
+                  <button class="fav-btn active" data-id="${p.id}" title="Remove Favourite">
+                    ❤️
+                  </button>
+
+                  <div class="card-badge-container">
+                    <span class="badge badge-secondary">${p.property_type.replace('_', ' ')}</span>
+                    ${kycBadge}
+                  </div>
+                </div>
+                
+                <div class="card-content">
+                  <div class="card-price">${parseFloat(p.rent).toLocaleString()} LKR<span> / month</span></div>
+                  <a href="/pages/listing.html?slug=${p.slug}" class="card-title">${p.title}</a>
+                  
+                  <div class="card-location">
+                    <span>📍</span> ${p.city_name}
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('');
+
+          // Bind click removal
+          grid.querySelectorAll('.fav-btn').forEach((btn) => {
+            btn.addEventListener('click', async (e) => {
+              e.stopPropagation();
+              const propertyId = btn.getAttribute('data-id');
+              
+              try {
+                const deleteRes = await client.delete(`favourites/${propertyId}`);
+                if (deleteRes.success) {
+                  localStorage.removeItem(`fav-${propertyId}`);
+                  document.getElementById(`fav-card-${propertyId}`).remove();
+                  UI.showToast('Removed from favourites.', 'success');
+                  
+                  // Re-check count
+                  const items = grid.querySelectorAll('.listing-card');
+                  if (items.length === 0) {
+                    empty.classList.remove('hidden');
+                  }
+                }
+              } catch (err) {
+                UI.showToast(err.message, 'error');
+              }
+            });
+          });
+        }
+      } catch (err) {
+        UI.showToast('Failed to load favourites list: ' + err.message, 'error');
+      }
+    }
+  </script>
+</body>
+</html>

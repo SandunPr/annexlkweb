@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Log In — AnnexLK</title>
+  
+  <link rel="stylesheet" href="/assets/css/variables.css">
+  <link rel="stylesheet" href="/assets/css/base.css">
+  <link rel="stylesheet" href="/assets/css/layout.css">
+  <link rel="stylesheet" href="/assets/css/components.css">
+  <link rel="stylesheet" href="/assets/css/forms.css">
+  <link rel="stylesheet" href="/assets/css/responsive.css">
+  
+  <!-- Google Sign-In SDK -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  
+  <style>
+    .auth-container {
+      max-width: 440px;
+      margin: 40px auto;
+      background-color: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius-lg);
+      padding: 40px;
+      box-shadow: var(--shadow-lg);
+    }
+    .divider {
+      display: flex;
+      align-items: center;
+      text-align: center;
+      margin: 20px 0;
+      color: var(--text-light);
+      font-size: 13px;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      border-bottom: 1px solid var(--surface-border);
+    }
+    .divider:not(:empty)::before { margin-right: .25em; }
+    .divider:not(:empty)::after { margin-left: .25em; }
+  </style>
+</head>
+<body>
+
+  <header id="app-header"></header>
+
+  <main class="main-layout flex align-center">
+    <div class="container">
+      <div class="auth-container">
+        <h2 class="mb-10 text-center">Welcome Back</h2>
+        <p class="text-muted text-center mb-20" style="font-size: 14px;">Log in to access your dashboard, favourites, and listing details.</p>
+        
+        <form id="login-form">
+          <div class="form-group">
+            <label for="email" class="form-label">Email Address</label>
+            <input type="email" id="email" class="form-control" placeholder="name@domain.com" required>
+          </div>
+          
+          <div class="form-group" style="margin-bottom: 12px;">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" id="password" class="form-control" placeholder="••••••••" required>
+          </div>
+
+          <div class="text-right mb-20">
+            <a href="#" style="font-size: 13px; font-weight: 500;" class="text-primary">Forgot Password?</a>
+          </div>
+
+          <button type="submit" id="submit-btn" class="btn btn-primary" style="width: 100%; height: 46px;">Log In</button>
+        </form>
+
+        <div class="divider">or sign in with</div>
+
+        <!-- Google OAuth Button container -->
+        <div style="display: flex; justify-content: center;">
+          <div id="g_id_onload"
+               data-client_id="placeholder_client_id.apps.googleusercontent.com"
+               data-context="signin"
+               data-ux_mode="popup"
+               data-callback="onGoogleSignIn"
+               data-auto_prompt="false">
+          </div>
+          <div class="g_id_signin"
+               data-type="standard"
+               data-shape="rectangular"
+               data-theme="outline"
+               data-text="signin_with"
+               data-size="large"
+               data-logo_alignment="left">
+          </div>
+        </div>
+
+        <p class="text-center text-muted mt-20" style="font-size: 13px;">
+          Don't have an account? <a href="/pages/register.html" class="text-primary" style="font-weight: 600;">Sign Up</a>
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <footer id="app-footer"></footer>
+
+  <script type="module">
+    import Navigation from '/assets/js/utils/navigation.js';
+    import AuthService from '/assets/js/auth/authService.js';
+    import UI from '/assets/js/components/ui.js';
+    import Session from '/assets/js/state/session.js';
+    import CONFIG from '/assets/js/config.js';
+    
+    document.addEventListener('DOMContentLoaded', () => {
+      Navigation.init();
+
+      // Configure Google Sign-In client ID dynamically from config
+      const gLoader = document.getElementById('g_id_onload');
+      if (gLoader && CONFIG.GOOGLE_CLIENT_ID !== 'your_google_client_id.apps.googleusercontent.com') {
+        gLoader.setAttribute('data-client_id', CONFIG.GOOGLE_CLIENT_ID);
+      }
+
+      // Check URL query for expiry message
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('expired') === 'true') {
+        UI.showToast('Your session has expired. Please log in again.', 'warning');
+      }
+
+      // 1. Handle Credentials Submission
+      const form = document.getElementById('login-form');
+      const submitBtn = document.getElementById('submit-btn');
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+
+        submitBtn.disabled = true;
+        submitBtn.innerText = 'Logging in...';
+
+        try {
+          const res = await AuthService.login(email, password);
+          if (res.success) {
+            UI.showToast('Login successful!', 'success');
+            
+            // Redirect based on role
+            const user = Session.getUser();
+            setTimeout(() => {
+              if (user.role === 'ADMINISTRATOR') {
+                window.location.href = '/pages/admin/dashboard.html';
+              } else if (user.role === 'PROPERTY_OWNER') {
+                window.location.href = '/pages/owner-dashboard.html';
+              } else {
+                window.location.href = '/pages/search.html';
+              }
+            }, 1000);
+          }
+        } catch (err) {
+          UI.showToast(err.message || 'Login failed.', 'error');
+          submitBtn.disabled = false;
+          submitBtn.innerText = 'Log In';
+        }
+      });
+    });
+
+    // 2. Google OAuth callback handler (must be global for GIS SDK wrapper)
+    window.onGoogleSignIn = async (response) => {
+      try {
+        const res = await AuthService.loginWithGoogle(response.credential);
+        if (res.success) {
+          UI.showToast('Google login successful!', 'success');
+          const user = Session.getUser();
+          setTimeout(() => {
+            if (user.role === 'ADMINISTRATOR') {
+              window.location.href = '/pages/admin/dashboard.html';
+            } else if (user.role === 'PROPERTY_OWNER') {
+              window.location.href = '/pages/owner-dashboard.html';
+            } else {
+              window.location.href = '/pages/search.html';
+            }
+          }, 1000);
+        }
+      } catch (err) {
+        UI.showToast(err.message || 'Google login failed.', 'error');
+      }
+    };
+  </script>
+</body>
+</html>
