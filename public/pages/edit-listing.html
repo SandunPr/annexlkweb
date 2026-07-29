@@ -298,8 +298,8 @@
         formData.append('billsIncluded', document.getElementById('billsIncluded').checked);
         formData.append('cityId', parseInt(document.getElementById('cityId').value, 10));
         formData.append('addressText', document.getElementById('addressText').value.trim());
-        formData.append('latitude', parseFloat(document.getElementById('latitude').value));
-        formData.append('longitude', parseFloat(document.getElementById('longitude').value));
+        formData.append('exactLatitude', parseFloat(document.getElementById('latitude').value));
+        formData.append('exactLongitude', parseFloat(document.getElementById('longitude').value));
 
         if (hasFiles) {
           formData.append('main', main);
