@@ -11,11 +11,11 @@ const registerSchema = Joi.object({
   password: Joi.string()
     .min(8)
     .max(100)
-    .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/)
+    .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/)
     .required()
     .messages({
       'string.min': 'Password must be at least 8 characters long.',
-      'string.pattern.base': 'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&).',
+      'string.pattern.base': 'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.',
       'any.required': 'Password is required.',
     }),
   roleName: Joi.string()
@@ -73,7 +73,7 @@ const resetPasswordSchema = Joi.object({
   password: Joi.string()
     .min(8)
     .max(100)
-    .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/)
+    .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/)
     .required(),
 });
 
