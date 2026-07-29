@@ -75,7 +75,7 @@
         <!-- Google OAuth Button container -->
         <div style="display: flex; justify-content: center;">
           <div id="g_id_onload"
-               data-client_id="placeholder_client_id.apps.googleusercontent.com"
+               data-client_id="142698783875-sjcfvk9j6queirr7k6cagk9hpm0icf9v.apps.googleusercontent.com"
                data-context="signin"
                data-ux_mode="popup"
                data-callback="onGoogleSignIn"
@@ -112,7 +112,7 @@
 
       // Configure Google Sign-In client ID dynamically from config
       const gLoader = document.getElementById('g_id_onload');
-      if (gLoader && CONFIG.GOOGLE_CLIENT_ID !== 'your_google_client_id.apps.googleusercontent.com') {
+      if (gLoader && CONFIG.GOOGLE_CLIENT_ID && CONFIG.GOOGLE_CLIENT_ID !== 'your_google_client_id.apps.googleusercontent.com') {
         gLoader.setAttribute('data-client_id', CONFIG.GOOGLE_CLIENT_ID);
       }
 
