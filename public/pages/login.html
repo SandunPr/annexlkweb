@@ -12,8 +12,7 @@
   <link rel="stylesheet" href="/assets/css/forms.css">
   <link rel="stylesheet" href="/assets/css/responsive.css">
   
-  <!-- Google Sign-In SDK -->
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
+
   
   <style>
     .auth-container {
@@ -110,10 +109,17 @@
     document.addEventListener('DOMContentLoaded', () => {
       Navigation.init();
 
-      // Configure Google Sign-In client ID dynamically from config
+      // Configure Google Sign-In client ID dynamically from config and load SDK
       const gLoader = document.getElementById('g_id_onload');
       if (gLoader && CONFIG.GOOGLE_CLIENT_ID && CONFIG.GOOGLE_CLIENT_ID !== 'your_google_client_id.apps.googleusercontent.com') {
         gLoader.setAttribute('data-client_id', CONFIG.GOOGLE_CLIENT_ID);
+        
+        // Dynamically load Google Sign-In SDK after setting the Client ID
+        const script = document.createElement('script');
+        script.src = 'https://accounts.google.com/gsi/client';
+        script.async = true;
+        script.defer = true;
+        document.head.appendChild(script);
       }
 
       // Check URL query for expiry message
