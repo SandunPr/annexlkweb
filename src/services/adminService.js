@@ -25,12 +25,16 @@ class AdminService {
    */
   async getPendingKyc() {
     const query = `
-      SELECT ks.id, ks.user_id, ks.status, ks.full_name, ks.dob, ks.id_type, ks.id_number, ks.submitted_at,
-             u.email, p.phone_number
+      SELECT ks.id, ks.user_id, ks.status, ks.full_name, ks.dob, ks.id_type, ks.id_number, ks.submitted_at, ks.address,
+             u.email, p.phone_number,
+             kd_front.file_path AS id_front_path,
+             kd_back.file_path AS id_back_path
       FROM kyc_submissions ks
       JOIN users u ON ks.user_id = u.id
       JOIN user_profiles p ON u.id = p.user_id
-      WHERE ks.status = 'PENDING_REVIEW'
+      LEFT JOIN kyc_documents kd_front ON ks.id = kd_front.kyc_submission_id AND kd_front.document_type = "id_front"
+      LEFT JOIN kyc_documents kd_back ON ks.id = kd_back.kyc_submission_id AND kd_back.document_type = "id_back"
+      WHERE ks.status = "PENDING_REVIEW"
       ORDER BY ks.submitted_at ASC
     `;
     return await db.query(query);
