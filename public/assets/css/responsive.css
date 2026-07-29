@@ -238,3 +238,78 @@
     grid-template-columns: 1fr !important;
   }
 }
+
+/* ==========================================================================
+   Advanced Responsive Enhancements (Touch Safeguards, Fluid Spacing, Grids)
+   ========================================================================== */
+
+/* 1. Touch-Safe Interaction Overrides (Disables sticky hover on mobile taps) */
+@media (hover: none) {
+  .listing-card:hover {
+    transform: none !important;
+    box-shadow: var(--shadow-sm) !important;
+  }
+  .listing-card:hover .card-img {
+    transform: none !important;
+  }
+  .btn-primary:hover {
+    transform: none !important;
+    box-shadow: var(--shadow-sm) !important;
+    background-color: var(--primary) !important;
+  }
+  .btn-secondary:hover {
+    transform: none !important;
+    background-color: var(--secondary) !important;
+  }
+  .social-icon:hover {
+    transform: none !important;
+    background-color: var(--background) !important;
+    color: inherit !important;
+  }
+}
+
+/* 2. Custom Fluid Scrollbar Styles for horizontal overflow panels */
+.admin-tabs, .data-table-container {
+  scrollbar-width: thin;
+  scrollbar-color: var(--surface-border) transparent;
+}
+
+.admin-tabs::-webkit-scrollbar, .data-table-container::-webkit-scrollbar {
+  height: 5px;
+}
+
+.admin-tabs::-webkit-scrollbar-track, .data-table-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.admin-tabs::-webkit-scrollbar-thumb, .data-table-container::-webkit-scrollbar-thumb {
+  background-color: var(--surface-border);
+  border-radius: var(--radius-full);
+}
+
+/* 3. Fluid layout padding configurations using HSL spacing design tokens */
+.container {
+  padding-left: var(--space-md) !important;
+  padding-right: var(--space-md) !important;
+}
+
+.main-layout {
+  padding-top: var(--space-lg) !important;
+  padding-bottom: var(--space-lg) !important;
+}
+
+.hero-section {
+  padding-top: var(--space-xl) !important;
+  padding-bottom: var(--space-xl) !important;
+}
+
+.hero-title {
+  font-size: var(--font-size-hero) !important;
+}
+
+/* 4. Fluid CSS Grid Helper (Intelligent wrapping without break points) */
+.grid-fluid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 285px), 1fr)) !important;
+  gap: var(--space-md) !important;
+}
