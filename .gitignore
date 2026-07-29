@@ -1,0 +1,17 @@
+# Dependency directories
+node_modules/
+public/node_modules/
+
+# Environment files
+.env
+.env.backup
+.env.local
+
+# Logs
+logs/
+*.log
+
+# Uploads / Private Storage
+storage/temporary/
+storage/private/
+storage/public/listings/
