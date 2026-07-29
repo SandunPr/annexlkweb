@@ -32,7 +32,7 @@ class RenterService {
   }
 
   async addFavourite(userId, propertyId) {
-    const [prop] = await db.query('SELECT id FROM properties WHERE id = ? AND status != "DELETED"', [propertyId]);
+    const prop = await db.query('SELECT id FROM properties WHERE id = ? AND status != "DELETED"', [propertyId]);
     if (prop.length === 0) {
       throw new NotFoundError('Property listing not found.');
     }
@@ -170,7 +170,7 @@ class RenterService {
   // ==========================================
 
   async submitReport(userId, propertyId, { category, comment }) {
-    const [prop] = await db.query('SELECT id FROM properties WHERE id = ? AND status != "DELETED"', [propertyId]);
+    const prop = await db.query('SELECT id FROM properties WHERE id = ? AND status != "DELETED"', [propertyId]);
     if (prop.length === 0) {
       throw new NotFoundError('Property listing not found.');
     }
@@ -213,7 +213,7 @@ class RenterService {
 
   async submitReview(userId, propertyId, { rating, comment }) {
     // 1. Verify property
-    const [propRows] = await db.query('SELECT owner_id FROM properties WHERE id = ? AND status = "ACTIVE"', [propertyId]);
+    const propRows = await db.query('SELECT owner_id FROM properties WHERE id = ? AND status = "ACTIVE"', [propertyId]);
     if (propRows.length === 0) {
       throw new NotFoundError('Active property listing not found.');
     }
@@ -225,7 +225,7 @@ class RenterService {
     }
 
     // 3. Prevent reviewing without interaction (contact events check)
-    const [contactCheck] = await db.query(
+    const contactCheck = await db.query(
       'SELECT id FROM contact_events WHERE user_id = ? AND property_id = ? LIMIT 1',
       [userId, propertyId]
     );
@@ -234,7 +234,7 @@ class RenterService {
     }
 
     // 4. Prevent duplicate reviews
-    const [existing] = await db.query(
+    const existing = await db.query(
       'SELECT id FROM reviews WHERE reviewer_id = ? AND property_id = ?',
       [userId, propertyId]
     );

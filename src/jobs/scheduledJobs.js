@@ -99,13 +99,13 @@ async function runScheduledJobs() {
 
     for (const p of reminderProperties) {
       // Check if we already sent a reminder today (to prevent duplicate spam)
-      const [[exists]] = await db.query(
+      const existsRows = await db.query(
         `SELECT id FROM notifications 
          WHERE user_id = ? AND title = 'Listing Expiry Warning' AND created_at >= DATE(NOW()) LIMIT 1`,
         [p.owner_id]
       );
 
-      if (!exists) {
+      if (existsRows.length === 0) {
         await db.query(
           `INSERT INTO notifications (user_id, title, message) 
            VALUES (?, 'Listing Expiry Warning', ?)`,

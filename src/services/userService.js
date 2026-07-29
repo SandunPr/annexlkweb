@@ -22,7 +22,7 @@ class UserService {
     // Phone numbers must be unique, so check if another user has it
     if (profileData.phoneNumber) {
       const existing = await userRepository.findByEmail(profileData.phoneNumber); // helper or custom check
-      const [rows] = await db.query(
+      const rows = await db.query(
         'SELECT user_id FROM user_profiles WHERE phone_number = ? AND user_id != ?',
         [profileData.phoneNumber, userId]
       );
@@ -75,7 +75,7 @@ class UserService {
    */
   async confirmPhoneVerification(userId, code) {
     // Fetch latest active code
-    const [rows] = await db.query(
+    const rows = await db.query(
       'SELECT id, code, expires_at, verified_at FROM phone_verifications WHERE user_id = ? AND verified_at IS NULL ORDER BY created_at DESC LIMIT 1',
       [userId]
     );

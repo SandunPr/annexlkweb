@@ -402,7 +402,7 @@ class PropertyRepository {
     // 4. University Proximity filter
     if (filters.universityId) {
       // Find university coordinates
-      const [uniRows] = await db.query('SELECT latitude, longitude FROM universities WHERE id = ?', [filters.universityId]);
+      const uniRows = await db.query('SELECT latitude, longitude FROM universities WHERE id = ?', [filters.universityId]);
       if (uniRows.length > 0) {
         const uni = uniRows[0];
         const uniDistanceFormula = `
@@ -568,7 +568,7 @@ class PropertyRepository {
       queryParams.push(filters.latitude, filters.longitude, filters.latitude, maxDistance);
     }
     if (filters.universityId) {
-      const [uniRows] = await db.query('SELECT latitude, longitude FROM universities WHERE id = ?', [filters.universityId]);
+      const uniRows = await db.query('SELECT latitude, longitude FROM universities WHERE id = ?', [filters.universityId]);
       if (uniRows.length > 0) {
         const uni = uniRows[0];
         const uniDistanceFormula = `

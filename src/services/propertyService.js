@@ -25,7 +25,7 @@ class PropertyService {
     let counter = 1;
 
     while (counter < 100) {
-      const [rows] = await db.query('SELECT id FROM properties WHERE slug = ? AND status != "DELETED"', [uniqueSlug]);
+      const rows = await db.query('SELECT id FROM properties WHERE slug = ? AND status != "DELETED"', [uniqueSlug]);
       if (rows.length === 0) {
         return uniqueSlug;
       }

@@ -40,7 +40,7 @@ class AdminService {
    * View details of a specific KYC submission with audit logging.
    */
   async getKycDetails(submissionId, adminId, ip, userAgent) {
-    const [submissions] = await db.query(
+    const submissions = await db.query(
       `SELECT ks.id, ks.user_id, ks.status, ks.full_name, ks.dob, ks.id_type, ks.id_number, ks.address, ks.phone_number, ks.submitted_at, ks.reviewed_at, ks.review_notes,
               u.email
        FROM kyc_submissions ks
@@ -78,7 +78,7 @@ class AdminService {
    * Retrieve file path of a private document and write access logs.
    */
   async getKycDocumentFile(documentId, adminId, ip, userAgent) {
-    const [rows] = await db.query(
+    const rows = await db.query(
       `SELECT kd.id, kd.document_type, kd.file_path, ks.user_id, ks.id AS submission_id
        FROM kyc_documents kd
        JOIN kyc_submissions ks ON kd.kyc_submission_id = ks.id
@@ -113,7 +113,7 @@ class AdminService {
    * Approve a KYC submission and promote user to IDENTITY_VERIFIED status.
    */
   async approveKyc(submissionId, reviewerId, ip, userAgent) {
-    const [submissions] = await db.query('SELECT user_id, status FROM kyc_submissions WHERE id = ?', [submissionId]);
+    const submissions = await db.query('SELECT user_id, status FROM kyc_submissions WHERE id = ?', [submissionId]);
     if (submissions.length === 0) {
       throw new NotFoundError('KYC submission not found.');
     }
@@ -166,7 +166,7 @@ class AdminService {
    * Reject a KYC submission.
    */
   async rejectKyc(submissionId, reviewerId, notes, ip, userAgent) {
-    const [submissions] = await db.query('SELECT user_id, status FROM kyc_submissions WHERE id = ?', [submissionId]);
+    const submissions = await db.query('SELECT user_id, status FROM kyc_submissions WHERE id = ?', [submissionId]);
     if (submissions.length === 0) {
       throw new NotFoundError('KYC submission not found.');
     }
@@ -219,13 +219,13 @@ class AdminService {
    * Fetch general system administrative statistics.
    */
   async getDashboardStats() {
-    const [[usersCount]] = await db.query('SELECT COUNT(id) AS count FROM users');
-    const [[verifiedCount]] = await db.query('SELECT COUNT(id) AS count FROM users WHERE kyc_status IN ("IDENTITY_VERIFIED", "PROPERTY_VERIFIED", "TRUSTED_OWNER")');
-    const [[activeListingsCount]] = await db.query('SELECT COUNT(id) AS count FROM properties WHERE status = "ACTIVE"');
-    const [[pendingListingsCount]] = await db.query('SELECT COUNT(id) AS count FROM properties WHERE status = "PENDING_REVIEW"');
-    const [[pendingKycCount]] = await db.query('SELECT COUNT(id) AS count FROM kyc_submissions WHERE status = "PENDING_REVIEW"');
-    const [[openReportsCount]] = await db.query('SELECT COUNT(id) AS count FROM reports WHERE status = "OPEN"');
-    const [[totalClicks]] = await db.query('SELECT SUM(contact_clicks_count) AS count FROM properties');
+    const usersCount = (await db.query('SELECT COUNT(id) AS count FROM users'))[0].count;
+    const verifiedCount = (await db.query('SELECT COUNT(id) AS count FROM users WHERE kyc_status IN ("IDENTITY_VERIFIED", "PROPERTY_VERIFIED", "TRUSTED_OWNER")'))[0].count;
+    const activeListingsCount = (await db.query('SELECT COUNT(id) AS count FROM properties WHERE status = "ACTIVE"'))[0].count;
+    const pendingListingsCount = (await db.query('SELECT COUNT(id) AS count FROM properties WHERE status = "PENDING_REVIEW"'))[0].count;
+    const pendingKycCount = (await db.query('SELECT COUNT(id) AS count FROM kyc_submissions WHERE status = "PENDING_REVIEW"'))[0].count;
+    const openReportsCount = (await db.query('SELECT COUNT(id) AS count FROM reports WHERE status = "OPEN"'))[0].count;
+    const totalClicks = (await db.query('SELECT SUM(contact_clicks_count) AS count FROM properties'))[0].count || 0;
 
     const registrations = await db.query(
       `SELECT DATE(created_at) AS date, COUNT(id) AS count 
@@ -324,7 +324,7 @@ class AdminService {
    * Approve property listing submission.
    */
   async approveListing(propertyId, adminId, ip, userAgent) {
-    const [prop] = await db.query('SELECT owner_id, status FROM properties WHERE id = ?', [propertyId]);
+    const prop = await db.query('SELECT owner_id, status FROM properties WHERE id = ?', [propertyId]);
     if (prop.length === 0) {
       throw new NotFoundError('Property listing not found.');
     }
@@ -366,7 +366,7 @@ class AdminService {
    * Reject property listing submission.
    */
   async rejectListing(propertyId, reason, adminId, ip, userAgent) {
-    const [prop] = await db.query('SELECT owner_id FROM properties WHERE id = ?', [propertyId]);
+    const prop = await db.query('SELECT owner_id FROM properties WHERE id = ?', [propertyId]);
     if (prop.length === 0) {
       throw new NotFoundError('Property listing not found.');
     }
@@ -408,7 +408,7 @@ class AdminService {
    * Suspend active listing (hides it from public searches).
    */
   async suspendListing(propertyId, adminId, ip, userAgent) {
-    const [prop] = await db.query('SELECT owner_id FROM properties WHERE id = ?', [propertyId]);
+    const prop = await db.query('SELECT owner_id FROM properties WHERE id = ?', [propertyId]);
     if (prop.length === 0) {
       throw new NotFoundError('Property listing not found.');
     }
@@ -465,7 +465,7 @@ class AdminService {
    * Moderate reports and update status (with internal admin review notes).
    */
   async updateReportStatus(reportId, status, note, adminId, ip, userAgent) {
-    const [reports] = await db.query('SELECT property_id, status FROM reports WHERE id = ?', [reportId]);
+    const reports = await db.query('SELECT property_id, status FROM reports WHERE id = ?', [reportId]);
     if (reports.length === 0) {
       throw new NotFoundError('Report record not found.');
     }

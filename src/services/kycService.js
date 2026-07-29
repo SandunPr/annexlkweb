@@ -11,7 +11,7 @@ class KycService {
    */
   async submitKyc(userId, { fullName, dob, idType, idNumber, address, phoneNumber }, files) {
     // 1. Validate user eligibility
-    const [userRows] = await db.query('SELECT kyc_status, is_suspended FROM users WHERE id = ?', [userId]);
+    const userRows = await db.query('SELECT kyc_status, is_suspended FROM users WHERE id = ?', [userId]);
     if (userRows.length === 0) {
       throw new NotFoundError('User not found.');
     }
