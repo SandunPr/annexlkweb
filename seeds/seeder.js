@@ -199,7 +199,7 @@ async function seed() {
         email: 'owner@annexlk.com',
         password: 'OwnerPass123!',
         role: 'PROPERTY_OWNER',
-        kyc: 'IDENTITY_VERIFIED', -- Already verified owner
+        kyc: 'IDENTITY_VERIFIED', // Already verified owner
         fullName: 'Sunil Perera',
         phone: '+94711112222',
         address: 'No. 45, Galle Road, Moratuwa',
@@ -208,7 +208,7 @@ async function seed() {
         email: 'pending@annexlk.com',
         password: 'PendingPass123!',
         role: 'PROPERTY_OWNER',
-        kyc: 'REGISTERED', -- Needs KYC verification
+        kyc: 'REGISTERED', // Needs KYC verification
         fullName: 'Kusal Mendis',
         phone: '+94722223333',
         address: 'No. 12, Kandy Road, Kelaniya',

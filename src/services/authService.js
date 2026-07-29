@@ -161,7 +161,7 @@ class AuthService {
     } else {
       userId = user.id;
       // 2. User exists, check if google identity is linked, if not link it
-      const [identities] = await db.query(
+      const identities = await db.query(
         'SELECT id FROM auth_identities WHERE user_id = ? AND provider = "google"',
         [userId]
       );
