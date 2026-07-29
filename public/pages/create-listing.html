@@ -328,9 +328,9 @@
         formData.append('longitude', parseFloat(document.getElementById('longitude').value));
 
         // Append images with matching Multer names
-        formData.append('images', main);
-        formData.append('images', interior);
-        formData.append('images', facility);
+        formData.append('main', main);
+        formData.append('interior', interior);
+        formData.append('facility', facility);
 
         // Gather facilities IDs Joi array formats
         const facilityIds = [];

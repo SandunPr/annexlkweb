@@ -302,9 +302,9 @@
         formData.append('longitude', parseFloat(document.getElementById('longitude').value));
 
         if (hasFiles) {
-          formData.append('images', main);
-          formData.append('images', interior);
-          formData.append('images', facility);
+          formData.append('main', main);
+          formData.append('interior', interior);
+          formData.append('facility', facility);
         }
 
         // Facilities IDs array parsing

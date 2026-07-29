@@ -8,7 +8,7 @@
   padding: 10px 20px;
   border-radius: var(--radius-md);
   font-weight: 600;
-  font-size: 14px;
+  font-size: clamp(13px, 1.3vw, 15px);
   cursor: pointer;
   border: 1px solid transparent;
   transition: all var(--transition-fast);

@@ -195,6 +195,7 @@
   .hero-search-box button[type="submit"] {
     width: 100% !important;
     height: 48px !important;
+    font-size: clamp(14px, 1.5vw, 16px) !important;
   }
   .category-section {
     margin-top: 20px !important;
