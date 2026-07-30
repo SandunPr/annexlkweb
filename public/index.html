@@ -459,9 +459,7 @@
   <!-- App scripts module initialization -->
   <script type="module">
     import Navigation from '/assets/js/utils/navigation.js';
-    import ApiClient from '/assets/js/utils/apiClient.js';
-
-    const client = new ApiClient();
+    import client from '/assets/js/api/client.js';
 
     document.addEventListener('DOMContentLoaded', async () => {
       Navigation.init();
