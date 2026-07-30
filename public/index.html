@@ -114,6 +114,160 @@
       justify-content: space-between;
       margin-top: 80px;
     }
+
+    /* ── Promoted Listings Carousel ── */
+    .promo-section {
+      padding: 60px 0 40px;
+      background: var(--surface-alt, var(--surface));
+      position: relative;
+      overflow: hidden;
+    }
+    .promo-section-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+    .promo-badge {
+      background: linear-gradient(135deg, #f59e0b, #ef4444);
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 20px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      animation: pulse-badge 2s infinite;
+    }
+    @keyframes pulse-badge {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(245,158,11,0.4); }
+      50%       { box-shadow: 0 0 0 6px rgba(245,158,11,0); }
+    }
+    .promo-track-wrapper {
+      overflow: hidden;
+      cursor: grab;
+      user-select: none;
+      position: relative;
+    }
+    .promo-track-wrapper::before,
+    .promo-track-wrapper::after {
+      content: '';
+      position: absolute;
+      top: 0; bottom: 0;
+      width: 80px;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .promo-track-wrapper::before { left: 0;  background: linear-gradient(to right, var(--surface-alt, var(--surface)), transparent); }
+    .promo-track-wrapper::after  { right: 0; background: linear-gradient(to left,  var(--surface-alt, var(--surface)), transparent); }
+    .promo-track {
+      display: flex;
+      gap: 20px;
+      transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      will-change: transform;
+    }
+    .promo-card {
+      flex: 0 0 300px;
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      cursor: pointer;
+      position: relative;
+      text-decoration: none;
+      color: inherit;
+    }
+    .promo-card:hover {
+      transform: translateY(-6px);
+      box-shadow: var(--shadow-lg);
+    }
+    .promo-card-img {
+      width: 100%;
+      height: 175px;
+      object-fit: cover;
+      background: var(--surface-border);
+      display: block;
+    }
+    .promo-card-img-placeholder {
+      width: 100%;
+      height: 175px;
+      background: linear-gradient(135deg, var(--primary-light, #e0e7ff), var(--surface-border));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+    }
+    .promo-sponsored-tag {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(0,0,0,0.65);
+      color: #fbbf24;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      backdrop-filter: blur(4px);
+    }
+    .promo-card-body {
+      padding: 14px 16px 16px;
+    }
+    .promo-card-title {
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 1.4;
+      margin-bottom: 8px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .promo-card-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .promo-card-rent {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+    .promo-card-location {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+    .promo-nav-dots {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 20px;
+    }
+    .promo-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--surface-border);
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .promo-dot.active {
+      background: var(--primary);
+      transform: scale(1.3);
+    }
+    #promo-placeholder {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100px;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
   </style>
 </head>
 <body>
@@ -198,6 +352,21 @@
           <p class="text-muted mt-10">Comfortable family homes</p>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- ★ Promoted Listings Carousel ★ -->
+  <section class="promo-section" id="promo-section" style="display:none;">
+    <div class="container">
+      <div class="promo-section-label">
+        <span class="promo-badge">✦ Sponsored</span>
+        <h2 style="font-size:20px; margin:0;">Featured Properties</h2>
+        <span class="text-muted" style="font-size:13px; margin-left:auto;">Promoted listings · <a href="/pages/contact.html" style="color:var(--primary);">Advertise here</a></span>
+      </div>
+      <div class="promo-track-wrapper" id="promo-track-wrapper">
+        <div class="promo-track" id="promo-track"></div>
+      </div>
+      <div class="promo-nav-dots" id="promo-dots"></div>
     </div>
   </section>
 
@@ -290,27 +459,107 @@
   <!-- App scripts module initialization -->
   <script type="module">
     import Navigation from '/assets/js/utils/navigation.js';
-    
-    document.addEventListener('DOMContentLoaded', () => {
+    import ApiClient from '/assets/js/utils/apiClient.js';
+
+    const client = new ApiClient();
+
+    document.addEventListener('DOMContentLoaded', async () => {
       Navigation.init();
-      
-      // Bind Search Form submission
+
+      // ── Promoted Carousel ──────────────────────────────────────────────
+      try {
+        const res = await client.get('listings/featured');
+        const items = (res && res.data) || [];
+        if (items.length > 0) {
+          buildPromoCarousel(items);
+          document.getElementById('promo-section').style.display = 'block';
+        }
+      } catch (_) { /* silently ignore — carousel is non-critical */ }
+
+      // ── Hero Search Form ───────────────────────────────────────────────
       const form = document.getElementById('hero-search-form');
       form.addEventListener('submit', (e) => {
         e.preventDefault();
         const city = document.getElementById('search-city').value;
         const type = document.getElementById('search-type').value;
         const rent = document.getElementById('search-rent').value;
-        
+
         let queryParams = [];
         if (city) queryParams.push(`cityId=${city}`);
         if (type) queryParams.push(`propertyType=${type}`);
         if (rent) queryParams.push(`maxRent=${rent}`);
-        
+
         const queryString = queryParams.length > 0 ? `?${queryParams.join('&')}` : '';
         window.location.href = `/pages/search.html${queryString}`;
       });
     });
+
+    /* ── Promoted Carousel Builder ── */
+    function buildPromoCarousel(items) {
+      const track = document.getElementById('promo-track');
+      const dotsEl = document.getElementById('promo-dots');
+      const CARD_W = 320; // card width + gap
+      const VISIBLE = Math.min(items.length, Math.floor(window.innerWidth > 1100 ? 3 : window.innerWidth > 700 ? 2 : 1));
+
+      // Duplicate items for seamless looping
+      const looped = [...items, ...items];
+
+      looped.forEach(p => {
+        const typeLabel = (p.property_type || '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+        const rentFmt = Number(p.rent).toLocaleString();
+        const imgHTML = p.main_thumbnail
+          ? `<img class="promo-card-img" src="/${p.main_thumbnail}" alt="${p.title}" loading="lazy">`
+          : `<div class="promo-card-img-placeholder">🏠</div>`;
+
+        const card = document.createElement('a');
+        card.className = 'promo-card';
+        card.href = `/pages/listing.html?slug=${p.slug}`;
+        card.innerHTML = `
+          ${imgHTML}
+          <span class="promo-sponsored-tag">Sponsored</span>
+          <div class="promo-card-body">
+            <div class="promo-card-title">${p.title}</div>
+            <div class="promo-card-location">📍 ${p.city_name || ''} · ${typeLabel}</div>
+            <div class="promo-card-meta">
+              <span class="promo-card-rent">LKR ${rentFmt}<small style="font-size:11px;font-weight:400">/mo</small></span>
+              <span class="badge badge-success" style="font-size:10px;">Active</span>
+            </div>
+          </div>`;
+        track.appendChild(card);
+      });
+
+      // Dots (for original items only)
+      let currentPage = 0;
+      items.forEach((_, i) => {
+        const dot = document.createElement('button');
+        dot.className = 'promo-dot' + (i === 0 ? ' active' : '');
+        dot.setAttribute('aria-label', `Slide ${i + 1}`);
+        dot.addEventListener('click', () => goTo(i));
+        dotsEl.appendChild(dot);
+      });
+
+      function goTo(page) {
+        currentPage = page % items.length;
+        track.style.transform = `translateX(-${currentPage * CARD_W}px)`;
+        dotsEl.querySelectorAll('.promo-dot').forEach((d, i) => d.classList.toggle('active', i === currentPage));
+      }
+
+      // Auto-scroll every 3.5 seconds
+      let timer = setInterval(() => goTo(currentPage + 1), 3500);
+
+      // Pause on hover
+      const wrapper = document.getElementById('promo-track-wrapper');
+      wrapper.addEventListener('mouseenter', () => clearInterval(timer));
+      wrapper.addEventListener('mouseleave', () => { timer = setInterval(() => goTo(currentPage + 1), 3500); });
+
+      // Swipe / drag support
+      let startX = 0;
+      wrapper.addEventListener('pointerdown', e => { startX = e.clientX; wrapper.setPointerCapture(e.pointerId); });
+      wrapper.addEventListener('pointerup',   e => {
+        const delta = startX - e.clientX;
+        if (Math.abs(delta) > 40) goTo(currentPage + (delta > 0 ? 1 : -1 + items.length));
+      });
+    }
   </script>
 </body>
 </html>

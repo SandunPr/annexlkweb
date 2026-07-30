@@ -2,8 +2,22 @@ const propertyService = require('../services/propertyService');
 
 class PropertyController {
   /**
+   * GET /api/v1/listings/featured
+   * Public — returns promoted listings for the advertisement carousel.
+   */
+  async getFeaturedListings(req, res, next) {
+    try {
+      const listings = await propertyService.getFeaturedListings();
+      res.status(200).json({ success: true, data: listings });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
    * POST /api/v1/listings
    */
+
   async createProperty(req, res, next) {
     try {
       const userId = req.user.id;

@@ -3,6 +3,7 @@ const userRepository = require('../repositories/userRepository');
 const imageProcessor = require('../utils/imageProcessor');
 const geoUtils = require('../utils/geo');
 const db = require('../config/db');
+const { FEATURED_LISTING_IDS } = require('../config/featuredListings');
 const { ForbiddenError, ValidationError, NotFoundError } = require('../utils/errors');
 const logger = require('../utils/logger');
 
@@ -221,6 +222,14 @@ class PropertyService {
    */
   async getOwnerDashboardListings(ownerId) {
     return await propertyRepository.getOwnerListings(ownerId);
+  }
+
+  /**
+   * Get featured/promoted listings for the advertisement carousel.
+   * IDs are managed in src/config/featuredListings.js
+   */
+  async getFeaturedListings() {
+    return await propertyRepository.findFeaturedByIds(FEATURED_LISTING_IDS);
   }
 
   /**

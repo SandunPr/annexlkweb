@@ -21,7 +21,10 @@ const listingUploadFields = upload.fields([
 // 1. Owner Dashboard Listings (Must place before /:slug parameter route)
 router.get('/owner/my-listings', authenticate, authorize('PROPERTY_OWNER'), propertyController.getMyListings);
 
-// 2. Public Detail Page Route
+// 2. Featured/Promoted Listings carousel (Public — no auth required)
+router.get('/featured', propertyController.getFeaturedListings);
+
+// 3. Public Detail Page Route
 router.get('/:slug', propertyController.getProperty);
 
 // 3. Write actions (Require authentication)

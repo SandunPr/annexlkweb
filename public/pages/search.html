@@ -41,6 +41,83 @@
       padding: 16px 24px;
     }
 
+    /* Sponsored horizontal strip */
+    .sponsored-strip {
+      border: 1px dashed #f59e0b;
+      background: linear-gradient(135deg, rgba(245,158,11,0.05), rgba(239,68,68,0.03));
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      margin-bottom: 20px;
+      overflow: hidden;
+      position: relative;
+    }
+    .sponsored-strip-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .sponsored-strip-badge {
+      background: linear-gradient(135deg, #f59e0b, #ef4444);
+      color: white;
+      font-size: 9px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .sponsored-strip-title {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .sponsored-strip-track {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      animation: strip-scroll 30s linear infinite;
+      animation-play-state: running;
+    }
+    .sponsored-strip-track:hover { animation-play-state: paused; }
+    .sponsored-strip-track::-webkit-scrollbar { display: none; }
+    @keyframes strip-scroll {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    .sponsored-chip {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius-sm);
+      padding: 6px 12px;
+      text-decoration: none;
+      color: inherit;
+      font-size: 12px;
+      white-space: nowrap;
+      scroll-snap-align: start;
+      transition: border-color 0.2s, transform 0.15s;
+    }
+    .sponsored-chip:hover {
+      border-color: var(--primary);
+      transform: translateY(-1px);
+    }
+    .sponsored-chip-thumb {
+      width: 34px; height: 34px;
+      border-radius: 6px;
+      object-fit: cover;
+      background: var(--surface-border);
+      flex-shrink: 0;
+    }
+    .sponsored-chip-info strong { display: block; font-size: 12px; }
+    .sponsored-chip-info span   { font-size: 10px; color: var(--text-muted); }
+    .sponsored-chip-rent { font-weight: 700; color: var(--primary); font-size: 13px; margin-left: 4px; }
+
   </style>
 </head>
 <body>
@@ -165,6 +242,15 @@
                 <option value="highest_rent">Rent: High to Low</option>
               </select>
             </div>
+          </div>
+
+          <!-- Sponsored Listings Strip -->
+          <div class="sponsored-strip" id="sponsored-strip" style="display:none;">
+            <div class="sponsored-strip-header">
+              <span class="sponsored-strip-badge">✦ Sponsored</span>
+              <span class="sponsored-strip-title">Featured properties &middot; <a href="/pages/contact.html" style="color:var(--primary);">Promote your listing</a></span>
+            </div>
+            <div class="sponsored-strip-track" id="sponsored-strip-track"></div>
           </div>
 
           <!-- Empty State -->
@@ -421,6 +507,29 @@
       nextBtn.disabled = pageInfo.page >= pageInfo.totalPages;
     }
 
+
+    // ── Sponsored Strip ────────────────────────────────────────────────
+    (async () => {
+      try {
+        const res = await client.get('listings/featured');
+        const items = (res && res.data) || [];
+        if (items.length === 0) return;
+        const track = document.getElementById('sponsored-strip-track');
+        // Duplicate for infinite scroll illusion
+        [...items, ...items].forEach(p => {
+          const a = document.createElement('a');
+          a.className = 'sponsored-chip';
+          a.href = `/pages/listing.html?slug=${p.slug}`;
+          const imgSrc = p.main_thumbnail ? `/${p.main_thumbnail}` : '';
+          const imgHTML = imgSrc
+            ? `<img class="sponsored-chip-thumb" src="${imgSrc}" alt="" loading="lazy">`
+            : `<div class="sponsored-chip-thumb" style="display:flex;align-items:center;justify-content:center;font-size:18px;">🏠</div>`;
+          a.innerHTML = `${imgHTML}<div class="sponsored-chip-info"><strong>${p.city_name || ''}</strong><span>${(p.property_type||'').replace(/_/g,' ')}</span></div><span class="sponsored-chip-rent">LKR ${Number(p.rent).toLocaleString()}</span>`;
+          track.appendChild(a);
+        });
+        document.getElementById('sponsored-strip').style.display = 'block';
+      } catch (_) { /* non-critical */ }
+    })();
 
   </script>
 </body>

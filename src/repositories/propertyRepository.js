@@ -79,8 +79,36 @@ class PropertyRepository {
   }
 
   /**
+   * Fetch promoted/featured listings by an array of IDs (for advertisement carousel).
+   * Only returns ACTIVE listings so expired promotions don't show stale cards.
+   */
+  async findFeaturedByIds(ids) {
+    if (!ids || ids.length === 0) return [];
+    const placeholders = ids.map(() => '?').join(', ');
+    const query = `
+      SELECT p.id, p.title, p.slug, p.property_type, p.rent, p.bills_included,
+             p.max_occupants, p.furnished_status, p.status,
+             pl.approx_latitude, pl.approx_longitude, pl.address_text,
+             c.name AS city_name, d.name AS district_name,
+             pi.thumbnail_path AS main_thumbnail,
+             up.full_name AS owner_name
+      FROM properties p
+      LEFT JOIN property_locations pl ON p.id = pl.property_id
+      LEFT JOIN cities c ON pl.city_id = c.id
+      LEFT JOIN districts d ON c.district_id = d.id
+      LEFT JOIN property_images pi ON p.id = pi.property_id AND pi.image_position = 1
+      LEFT JOIN users u ON p.owner_id = u.id
+      LEFT JOIN user_profiles up ON u.id = up.user_id
+      WHERE p.id IN (${placeholders}) AND p.status = 'ACTIVE'
+      ORDER BY FIELD(p.id, ${placeholders})
+    `;
+    return await db.query(query, [...ids, ...ids]);
+  }
+
+  /**
    * Create a property listing.
    */
+
   async create(propertyData, locationData, facilityIds) {
     const conn = await db.getTransaction();
     await conn.beginTransaction();
