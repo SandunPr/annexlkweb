@@ -141,8 +141,8 @@
     @media (max-width: 768px) {
       .listing-layout { grid-template-columns: 1fr; }
       .sticky-contact-bar { display: flex; }
-      .hide-mobile-aside { display: none; }
       .main-layout { padding-bottom: 90px; }
+      .sticky-sidebar { position: static !important; }
     }
     
     #approx-map {
@@ -335,8 +335,8 @@
                 </div>
               </div>
 
-              <!-- Right Actions Sidebar (Desktop) -->
-              <aside class="details-right hide-mobile-aside">
+              <!-- Right Actions Sidebar -->
+              <aside class="details-right">
                 <div class="info-card sticky-sidebar" style="position: sticky; top: 92px;">
                   <h3 class="mb-20">Contact Property Owner</h3>
                   
