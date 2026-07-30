@@ -434,7 +434,7 @@ class PropertyRepository {
       whereClauses.push('p.furnished_status = ?');
       queryParams.push(filters.furnishedStatus);
     }
-    if (filters.billsIncluded !== undefined) {
+    if (filters.billsIncluded !== undefined && filters.billsIncluded !== null) {
       whereClauses.push('p.bills_included = ?');
       queryParams.push(filters.billsIncluded ? 1 : 0);
     }
@@ -442,7 +442,7 @@ class PropertyRepository {
       whereClauses.push('p.max_occupants >= ?');
       queryParams.push(filters.maxOccupants);
     }
-    if (filters.currentOccupants !== undefined) {
+    if (filters.currentOccupants !== undefined && filters.currentOccupants !== null) {
       whereClauses.push('p.current_occupants <= ?');
       queryParams.push(filters.currentOccupants);
     }
@@ -598,7 +598,7 @@ class PropertyRepository {
       whereClauses.push('p.furnished_status = ?');
       queryParams.push(filters.furnishedStatus);
     }
-    if (filters.billsIncluded !== undefined) {
+    if (filters.billsIncluded !== undefined && filters.billsIncluded !== null) {
       whereClauses.push('p.bills_included = ?');
       queryParams.push(filters.billsIncluded ? 1 : 0);
     }
@@ -606,7 +606,7 @@ class PropertyRepository {
       whereClauses.push('p.max_occupants >= ?');
       queryParams.push(filters.maxOccupants);
     }
-    if (filters.currentOccupants !== undefined) {
+    if (filters.currentOccupants !== undefined && filters.currentOccupants !== null) {
       whereClauses.push('p.current_occupants <= ?');
       queryParams.push(filters.currentOccupants);
     }
