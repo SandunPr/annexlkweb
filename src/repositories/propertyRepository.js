@@ -90,7 +90,7 @@ class PropertyRepository {
       const [propResult] = await conn.execute(
         `INSERT INTO properties 
           (owner_id, title, slug, description, property_type, rent, deposit, advance_months, bills_included, available_date, min_duration_months, furnished_status, occupancy_type, max_occupants, current_occupants, status, last_confirmed_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'DRAFT', NOW())`,
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'PENDING_REVIEW', NOW())`,
         [
           propertyData.ownerId,
           propertyData.title,
