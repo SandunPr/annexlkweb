@@ -231,26 +231,55 @@ class AdminService {
     const openReportsCount = (await db.query('SELECT COUNT(id) AS count FROM reports WHERE status = "OPEN"'))[0].count;
     const totalClicks = (await db.query('SELECT SUM(contact_clicks_count) AS count FROM properties'))[0].count || 0;
 
+    // 1. User registrations trend over the last 15 days
     const registrations = await db.query(
-      `SELECT DATE(created_at) AS date, COUNT(id) AS count 
+      `SELECT DATE_FORMAT(created_at, "%Y-%m-%d") AS date, COUNT(id) AS count 
        FROM users 
        GROUP BY DATE(created_at) 
-       ORDER BY date DESC 
+       ORDER BY date ASC 
        LIMIT 15`
+    );
+
+    // 2. Property types breakdown
+    const propertyTypes = await db.query(
+      `SELECT property_type, COUNT(id) AS count 
+       FROM properties 
+       GROUP BY property_type`
+    );
+
+    // 3. Top cities by active property count
+    const topCities = await db.query(
+      `SELECT c.name AS city_name, COUNT(p.id) AS count
+       FROM properties p
+       JOIN property_locations pl ON p.id = pl.property_id
+       JOIN cities c ON pl.city_id = c.id
+       GROUP BY c.name
+       ORDER BY count DESC
+       LIMIT 5`
+    );
+
+    // 4. KYC Statuses breakdown
+    const kycBreakdown = await db.query(
+      `SELECT kyc_status, COUNT(id) AS count
+       FROM users
+       GROUP BY kyc_status`
     );
 
     return {
       totals: {
-        users: usersCount.count,
-        verifiedUsers: verifiedCount.count,
-        activeListings: activeListingsCount.count,
-        pendingListings: pendingListingsCount.count,
-        pendingKyc: pendingKycCount.count,
-        openReports: openReportsCount.count,
-        contactRevealClicks: totalClicks.count || 0,
+        users: usersCount,
+        verifiedUsers: verifiedCount,
+        activeListings: activeListingsCount,
+        pendingListings: pendingListingsCount,
+        pendingKyc: pendingKycCount,
+        openReports: openReportsCount,
+        contactRevealClicks: totalClicks,
       },
       charts: {
         registrations,
+        propertyTypes,
+        topCities,
+        kycBreakdown,
       },
     };
   }

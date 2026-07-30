@@ -12,6 +12,9 @@
   <link rel="stylesheet" href="/assets/css/forms.css">
   <link rel="stylesheet" href="/assets/css/responsive.css">
   
+  <!-- Chart.js for data visualization analytics -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
   <style>
     /* Tab Styles */
     .admin-tabs {
@@ -136,6 +139,34 @@
           <div class="metric-card" style="background-color: var(--surface);">
             <div class="metric-number" id="m-clicks">0</div>
             <div class="text-muted">Contact Reveals</div>
+          </div>
+        </div>
+
+        <!-- Chart Analysis Section -->
+        <div class="grid grid-2 gap-20" style="grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); margin-bottom: 40px;">
+          <div class="info-card">
+            <h3 class="mb-15">📈 User Registrations Trend (Last 15 Days)</h3>
+            <div style="position: relative; height: 260px; width: 100%;">
+              <canvas id="registrations-chart"></canvas>
+            </div>
+          </div>
+          <div class="info-card">
+            <h3 class="mb-15">🏡 Property Types Distribution</h3>
+            <div style="position: relative; height: 260px; width: 100%;">
+              <canvas id="property-types-chart"></canvas>
+            </div>
+          </div>
+          <div class="info-card">
+            <h3 class="mb-15">🛡️ User KYC Statuses</h3>
+            <div style="position: relative; height: 260px; width: 100%;">
+              <canvas id="kyc-breakdown-chart"></canvas>
+            </div>
+          </div>
+          <div class="info-card">
+            <h3 class="mb-15">🏙️ Active Listings by Region (Top Cities)</h3>
+            <div style="position: relative; height: 260px; width: 100%;">
+              <canvas id="top-cities-chart"></canvas>
+            </div>
           </div>
         </div>
       </div>
@@ -293,19 +324,125 @@
     });
 
     // ==========================================
-    // STATS DASHBOARD LOADER
+    // STATS DASHBOARD LOADER & CHART RENDERER
     // ==========================================
+    let regChartInstance = null;
+    let propChartInstance = null;
+    let kycChartInstance = null;
+    let cityChartInstance = null;
+
     async function loadDashboardStats() {
       try {
         const res = await client.get('admin/dashboard');
         if (res.success) {
           const stats = res.data.totals;
+          const chartsData = res.data.charts;
+
+          // Populate metrics
           document.getElementById('m-users').innerText = stats.users;
           document.getElementById('m-verified').innerText = stats.verifiedUsers;
           document.getElementById('m-listings').innerText = stats.activeListings;
           document.getElementById('m-pending-listings').innerText = stats.pendingListings;
           document.getElementById('m-reports').innerText = stats.openReports;
           document.getElementById('m-clicks').innerText = stats.contactRevealClicks;
+
+          // 1. User Registrations Trend Chart
+          const regCtx = document.getElementById('registrations-chart').getContext('2d');
+          if (regChartInstance) regChartInstance.destroy();
+          const regLabels = chartsData.registrations.map(r => r.date);
+          const regValues = chartsData.registrations.map(r => r.count);
+          regChartInstance = new Chart(regCtx, {
+            type: 'line',
+            data: {
+              labels: regLabels,
+              datasets: [{
+                label: 'New Registrations',
+                data: regValues,
+                borderColor: '#4F46E5',
+                backgroundColor: 'rgba(79, 70, 229, 0.08)',
+                tension: 0.3,
+                fill: true,
+                borderWidth: 2
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: { legend: { display: false } },
+              scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+            }
+          });
+
+          // 2. Property Types Chart
+          const propCtx = document.getElementById('property-types-chart').getContext('2d');
+          if (propChartInstance) propChartInstance.destroy();
+          const propLabels = chartsData.propertyTypes.map(p => p.property_type.replace('_', ' ').toUpperCase());
+          const propValues = chartsData.propertyTypes.map(p => p.count);
+          propChartInstance = new Chart(propCtx, {
+            type: 'doughnut',
+            data: {
+              labels: propLabels,
+              datasets: [{
+                data: propValues,
+                backgroundColor: ['#6366F1', '#10B981', '#F59E0B', '#EF4444', '#EC4899', '#8B5CF6'],
+                borderWidth: 1
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: { legend: { position: 'right' } }
+            }
+          });
+
+          // 3. KYC Breakdown Chart
+          const kycCtx = document.getElementById('kyc-breakdown-chart').getContext('2d');
+          if (kycChartInstance) kycChartInstance.destroy();
+          const kycLabels = chartsData.kycBreakdown.map(k => k.kyc_status.replace('_', ' '));
+          const kycValues = chartsData.kycBreakdown.map(k => k.count);
+          kycChartInstance = new Chart(kycCtx, {
+            type: 'bar',
+            data: {
+              labels: kycLabels,
+              datasets: [{
+                label: 'Users Count',
+                data: kycValues,
+                backgroundColor: '#10B981',
+                borderRadius: 4
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: { legend: { display: false } },
+              scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+            }
+          });
+
+          // 4. Top Cities Chart
+          const cityCtx = document.getElementById('top-cities-chart').getContext('2d');
+          if (cityChartInstance) cityChartInstance.destroy();
+          const cityLabels = chartsData.topCities.map(c => c.city_name);
+          const cityValues = chartsData.topCities.map(c => c.count);
+          cityChartInstance = new Chart(cityCtx, {
+            type: 'bar',
+            data: {
+              labels: cityLabels,
+              datasets: [{
+                label: 'Listings Count',
+                data: cityValues,
+                backgroundColor: '#F59E0B',
+                borderRadius: 4
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              indexAxis: 'y',
+              plugins: { legend: { display: false } },
+              scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } }
+            }
+          });
         }
       } catch (err) {
         UI.showToast(err.message, 'error');
