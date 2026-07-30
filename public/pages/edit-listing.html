@@ -12,6 +12,10 @@
   <link rel="stylesheet" href="/assets/css/forms.css">
   <link rel="stylesheet" href="/assets/css/responsive.css">
   
+  <!-- Leaflet Map picker CSS/JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  
   <style>
     .form-container {
       max-width: 800px;
@@ -175,6 +179,13 @@
             </div>
           </div>
 
+          <div class="form-row hidden" id="map-picker-container">
+            <div class="form-group" style="grid-column: span 2;">
+              <label class="form-label">Drag the marker to your property's exact location (or click anywhere on the map):</label>
+              <div id="map-picker" style="height: 280px; border-radius: var(--radius-md); border: 1px solid var(--surface-border); margin-top: 6px; z-index: 1;"></div>
+            </div>
+          </div>
+
           <h3 class="mb-15 pb-10 mt-20" style="border-bottom:1px solid var(--surface-border); font-size:16px;">Photos Upload (Optional - Select to Replace)</h3>
           <p class="text-muted mb-15" style="font-size:12px;">If you want to replace files, upload all three photos together.</p>
 
@@ -331,7 +342,63 @@
           submitBtn.innerText = 'Save Listing Changes';
         }
       });
+
+      // Auto coordinates mapping based on selected city
+      const coordinatesMap = {
+        '1': { lat: 6.9113, lng: 79.8497 }, // Col 3
+        '2': { lat: 6.9044, lng: 79.8660 }, // Col 7
+        '3': { lat: 6.7881, lng: 79.8913 }, // Moratuwa
+        '4': { lat: 6.9734, lng: 79.9142 }, // Kelaniya
+        '5': { lat: 6.8744, lng: 79.8912 }, // Nugegoda
+        '6': { lat: 7.2690, lng: 80.5925 }  // Peradeniya
+      };
+
+      const citySelect = document.getElementById('cityId');
+      citySelect.addEventListener('change', () => {
+        const selected = citySelect.value;
+        if (coordinatesMap[selected]) {
+          const lat = coordinatesMap[selected].lat;
+          const lng = coordinatesMap[selected].lng;
+          document.getElementById('latitude').value = lat;
+          document.getElementById('longitude').value = lng;
+          initPickerMap(lat, lng);
+        }
+      });
     });
+
+    let pickerMap = null;
+    let marker = null;
+
+    function initPickerMap(lat, lng) {
+      document.getElementById('map-picker-container').classList.remove('hidden');
+      
+      if (!pickerMap) {
+        pickerMap = L.map('map-picker').setView([lat, lng], 14);
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(pickerMap);
+
+        marker = L.marker([lat, lng], { draggable: true }).addTo(pickerMap);
+
+        // Update on drag
+        marker.on('dragend', () => {
+          const pos = marker.getLatLng();
+          document.getElementById('latitude').value = pos.lat.toFixed(6);
+          document.getElementById('longitude').value = pos.lng.toFixed(6);
+        });
+
+        // Update on map click
+        pickerMap.on('click', (e) => {
+          marker.setLatLng(e.latlng);
+          document.getElementById('latitude').value = e.latlng.lat.toFixed(6);
+          document.getElementById('longitude').value = e.latlng.lng.toFixed(6);
+        });
+      } else {
+        pickerMap.setView([lat, lng], 14);
+        marker.setLatLng([lat, lng]);
+        setTimeout(() => { pickerMap.invalidateSize(); }, 50);
+      }
+    }
 
     async function loadListingValues(id) {
       try {
@@ -362,6 +429,12 @@
           document.getElementById('addressText').value = p.address_text || '';
           document.getElementById('latitude').value = p.latitude;
           document.getElementById('longitude').value = p.longitude;
+
+          const lat = parseFloat(p.latitude);
+          const lng = parseFloat(p.longitude);
+          if (!isNaN(lat) && !isNaN(lng)) {
+            initPickerMap(lat, lng);
+          }
 
           // Check facility checkbox references
           if (p.facility_ids) {

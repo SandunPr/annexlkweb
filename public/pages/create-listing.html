@@ -12,6 +12,10 @@
   <link rel="stylesheet" href="/assets/css/forms.css">
   <link rel="stylesheet" href="/assets/css/responsive.css">
   
+  <!-- Leaflet Map picker CSS/JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  
   <style>
     .form-container {
       max-width: 800px;
@@ -189,6 +193,13 @@
             </div>
           </div>
 
+          <div class="form-row hidden" id="map-picker-container">
+            <div class="form-group" style="grid-column: span 2;">
+              <label class="form-label">Drag the marker to your property's exact location (or click anywhere on the map):</label>
+              <div id="map-picker" style="height: 280px; border-radius: var(--radius-md); border: 1px solid var(--surface-border); margin-top: 6px; z-index: 1;"></div>
+            </div>
+          </div>
+
           <h3 class="mb-15 pb-10 mt-20" style="border-bottom:1px solid var(--surface-border); font-size:16px;">Photos Upload (Exactly 3 Required)</h3>
           <p class="text-muted mb-15" style="font-size:12px;">Provide exactly three photos of the space: one thumbnail/outer photo, one indoor room view, and one bathroom/facility photo.</p>
 
@@ -267,12 +278,50 @@
         '6': { lat: 7.2690, lng: 80.5925 }  // Peradeniya
       };
 
+      let pickerMap = null;
+      let marker = null;
+
+      function initPickerMap(lat, lng) {
+        document.getElementById('map-picker-container').classList.remove('hidden');
+        
+        if (!pickerMap) {
+          pickerMap = L.map('map-picker').setView([lat, lng], 14);
+          L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          }).addTo(pickerMap);
+
+          marker = L.marker([lat, lng], { draggable: true }).addTo(pickerMap);
+
+          // Update on drag
+          marker.on('dragend', () => {
+            const pos = marker.getLatLng();
+            document.getElementById('latitude').value = pos.lat.toFixed(6);
+            document.getElementById('longitude').value = pos.lng.toFixed(6);
+          });
+
+          // Update on map click
+          pickerMap.on('click', (e) => {
+            marker.setLatLng(e.latlng);
+            document.getElementById('latitude').value = e.latlng.lat.toFixed(6);
+            document.getElementById('longitude').value = e.latlng.lng.toFixed(6);
+          });
+        } else {
+          pickerMap.setView([lat, lng], 14);
+          marker.setLatLng([lat, lng]);
+          // Invalidate size to force leaflet redraw correctly if container was hidden
+          setTimeout(() => { pickerMap.invalidateSize(); }, 50);
+        }
+      }
+
       const citySelect = document.getElementById('cityId');
       citySelect.addEventListener('change', () => {
         const selected = citySelect.value;
         if (coordinatesMap[selected]) {
-          document.getElementById('latitude').value = coordinatesMap[selected].lat;
-          document.getElementById('longitude').value = coordinatesMap[selected].lng;
+          const lat = coordinatesMap[selected].lat;
+          const lng = coordinatesMap[selected].lng;
+          document.getElementById('latitude').value = lat;
+          document.getElementById('longitude').value = lng;
+          initPickerMap(lat, lng);
         }
       });
 
