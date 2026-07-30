@@ -329,15 +329,31 @@ class PropertyRepository {
    */
   async getOwnerListings(ownerId) {
     const query = `
-      SELECT p.id, p.title, p.slug, p.rent, p.status, p.last_confirmed_at, p.views_count, p.favourites_count, p.contact_clicks_count,
-             pi.thumbnail_path AS main_thumbnail
+      SELECT p.id, p.title, p.slug, p.property_type, p.description,
+             p.rent, p.deposit, p.advance_months, p.bills_included,
+             p.available_date, p.min_duration_months, p.furnished_status,
+             p.occupancy_type, p.max_occupants, p.current_occupants,
+             p.status, p.last_confirmed_at, p.views_count, p.favourites_count, p.contact_clicks_count,
+             pl.city_id, pl.address_text, pl.exact_latitude AS latitude, pl.exact_longitude AS longitude,
+             pl.approx_latitude, pl.approx_longitude, pl.google_place_id,
+             c.name AS city_name, d.name AS district_name,
+             pi.thumbnail_path AS main_thumbnail,
+             GROUP_CONCAT(DISTINCT pf.facility_id) AS facility_ids
       FROM properties p
+      LEFT JOIN property_locations pl ON p.id = pl.property_id
+      LEFT JOIN cities c ON pl.city_id = c.id
+      LEFT JOIN districts d ON c.district_id = d.id
       LEFT JOIN property_images pi ON p.id = pi.property_id AND pi.image_position = 1
+      LEFT JOIN property_facilities pf ON p.id = pf.property_id
       WHERE p.owner_id = ? AND p.status != 'DELETED'
+      GROUP BY p.id, pl.city_id, pl.address_text, pl.exact_latitude, pl.exact_longitude,
+               pl.approx_latitude, pl.approx_longitude, pl.google_place_id,
+               c.name, d.name, pi.thumbnail_path
       ORDER BY p.created_at DESC
     `;
     return await db.query(query, [ownerId]);
   }
+
 
   /**
    * Search for property listings dynamically based on filters, coordinates, and ranking.

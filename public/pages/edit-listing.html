@@ -459,6 +459,9 @@
             initPickerMap(lat, lng);
           }
 
+          // Refresh title preview after all values are set
+          updateTitlePreview();
+
           // Check facility checkbox references
           if (p.facility_ids) {
             const list = Array.isArray(p.facility_ids) ? p.facility_ids : JSON.parse(`[${p.facility_ids}]`);
