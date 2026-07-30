@@ -12,9 +12,7 @@
   <link rel="stylesheet" href="/assets/css/forms.css">
   <link rel="stylesheet" href="/assets/css/responsive.css">
   
-  <!-- Leaflet CSS & JS (OpenStreetMap engine - Free, no keys required) -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 
   <style>
     .search-layout {
@@ -42,40 +40,7 @@
       border-radius: var(--radius-md);
       padding: 16px 24px;
     }
-    /* Map layout toggle */
-    .view-toggle {
-      display: flex;
-      border: 1px solid var(--surface-border);
-      border-radius: var(--radius-sm);
-      overflow: hidden;
-    }
-    .toggle-option {
-      padding: 8px 16px;
-      background-color: var(--surface);
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 13px;
-      user-select: none;
-      transition: all var(--transition-fast);
-    }
-    .toggle-option.active {
-      background-color: var(--primary);
-      color: white;
-    }
-    .results-map-container {
-      display: grid;
-      grid-template-columns: 1fr;
-      position: relative;
-    }
-    #map-search-view {
-      height: 600px;
-      border-radius: var(--radius-md);
-      border: 1px solid var(--surface-border);
-      margin-bottom: 30px;
-    }
-    .leaflet-container {
-      font-family: var(--font-sans);
-    }
+
   </style>
 </head>
 <body>
@@ -199,12 +164,6 @@
                 <option value="lowest_rent">Rent: Low to High</option>
                 <option value="highest_rent">Rent: High to Low</option>
               </select>
-
-              <!-- View toggles -->
-              <div class="view-toggle">
-                <div class="toggle-option active" id="list-view-btn">List</div>
-                <div class="toggle-option" id="map-view-btn">Map</div>
-              </div>
             </div>
           </div>
 
@@ -215,10 +174,7 @@
             <p class="text-muted mt-10">Try clearing filters or adjusting your rent ranges and location filters.</p>
           </div>
 
-          <!-- Map search container -->
-          <div id="map-view-container" class="hidden">
-            <div id="map-search-view"></div>
-          </div>
+
 
           <!-- Listings card grid -->
           <div class="listing-grid" id="listings-grid">
@@ -246,9 +202,6 @@
     import Session from '/assets/js/state/session.js';
     import CONFIG from '/assets/js/config.js';
 
-    let map = null;
-    let mapMarkers = [];
-    let currentView = 'list'; // 'list' or 'map'
     let currentPage = 1;
     let listingsData = [];
 
@@ -280,30 +233,7 @@
         fetchListings();
       });
 
-      // Bind View toggles
-      const listBtn = document.getElementById('list-view-btn');
-      const mapBtn = document.getElementById('map-view-btn');
-      const gridContainer = document.getElementById('listings-grid');
-      const mapContainer = document.getElementById('map-view-container');
 
-      listBtn.addEventListener('click', () => {
-        listBtn.classList.add('active');
-        mapBtn.classList.remove('active');
-        gridContainer.classList.remove('hidden');
-        mapContainer.classList.add('hidden');
-        currentView = 'list';
-      });
-
-      mapBtn.addEventListener('click', () => {
-        mapBtn.classList.add('active');
-        listBtn.classList.remove('active');
-        gridContainer.classList.add('hidden');
-        mapContainer.classList.remove('hidden');
-        currentView = 'map';
-        
-        // Lazy initialize map on first toggle
-        setTimeout(initLeafletMap, 50);
-      });
 
       // Bind sort changes
       document.getElementById('sort-select').addEventListener('change', () => {
@@ -375,10 +305,7 @@
           renderListings(listingsData);
           updatePaginationUI(res.meta.pagination);
 
-          // Update Map view markers if initialized
-          if (map) {
-            updateMapMarkers(listingsData);
-          }
+
         }
       } catch (err) {
         UI.showToast('Search execution failed: ' + err.message, 'error');
@@ -494,66 +421,7 @@
       nextBtn.disabled = pageInfo.page >= pageInfo.totalPages;
     }
 
-    // ==========================================
-    // MAP INTEGRATION VIEW (Leaflet OSMap)
-    // ==========================================
-    function initLeafletMap() {
-      if (map) return; // Already loaded
 
-      // Default Colombo Center
-      map = L.map('map-search-view').setView([CONFIG.DEFAULT_MAP_CENTER.lat, CONFIG.DEFAULT_MAP_CENTER.lng], 12);
-
-      // Load street map tiles from OpenStreetMap contributors
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-      }).addTo(map);
-
-      updateMapMarkers(listingsData);
-    }
-
-    function updateMapMarkers(listings) {
-      if (!map) return;
-
-      // Clear existing markers
-      mapMarkers.forEach(m => map.removeLayer(m));
-      mapMarkers = [];
-
-      if (listings.length === 0) return;
-
-      const group = [];
-
-      listings.forEach((p) => {
-        if (p.approx_latitude && p.approx_longitude) {
-          const center = [parseFloat(p.approx_latitude), parseFloat(p.approx_longitude)];
-          
-          // Draw privacy circular zone (radius 250m) instead of exact marker
-          const circle = L.circle(center, {
-            color: 'var(--primary)',
-            fillColor: 'var(--primary)',
-            fillOpacity: 0.15,
-            radius: 250 // 250 meters privacy radius
-          }).addTo(map);
-
-          // Bind Popup details
-          circle.bindPopup(`
-            <div style="font-family: var(--font-sans); width: 180px;">
-              <strong style="display:block; margin-bottom: 4px; font-size: 13px;">${p.title}</strong>
-              <span style="color:var(--primary); font-weight:700; font-size:14px;">${parseFloat(p.rent).toLocaleString()} LKR</span>
-              <p style="font-size:11px; color:var(--text-muted); margin-top:4px;">📍 Approximate Location</p>
-              <a href="/pages/listing.html?slug=${p.slug}" style="display:block; margin-top:8px; font-weight:600; color:var(--secondary); font-size:12px;">View Details &raquo;</a>
-            </div>
-          `);
-
-          mapMarkers.push(circle);
-          group.push(center);
-        }
-      });
-
-      // Fit map boundary viewport to include all markers
-      if (group.length > 0) {
-        map.fitBounds(L.latLngBounds(group), { padding: [30, 30] });
-      }
-    }
   </script>
 </body>
 </html>
