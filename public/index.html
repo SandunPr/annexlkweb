@@ -506,7 +506,7 @@
         const typeLabel = (p.property_type || '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
         const rentFmt = Number(p.rent).toLocaleString();
         const imgHTML = p.main_thumbnail
-          ? `<img class="promo-card-img" src="/${p.main_thumbnail}" alt="${p.title}" loading="lazy">`
+          ? `<img class="promo-card-img" src="${p.main_thumbnail}" alt="${p.title}" loading="lazy">`
           : `<div class="promo-card-img-placeholder">🏠</div>`;
 
         const card = document.createElement('a');

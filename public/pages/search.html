@@ -520,7 +520,7 @@
           const a = document.createElement('a');
           a.className = 'sponsored-chip';
           a.href = `/pages/listing.html?slug=${p.slug}`;
-          const imgSrc = p.main_thumbnail ? `/${p.main_thumbnail}` : '';
+          const imgSrc = p.main_thumbnail ? `${p.main_thumbnail}` : '';
           const imgHTML = imgSrc
             ? `<img class="sponsored-chip-thumb" src="${imgSrc}" alt="" loading="lazy">`
             : `<div class="sponsored-chip-thumb" style="display:flex;align-items:center;justify-content:center;font-size:18px;">🏠</div>`;
