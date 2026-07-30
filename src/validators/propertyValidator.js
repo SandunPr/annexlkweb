@@ -2,10 +2,7 @@ const Joi = require('joi');
 
 const createPropertySchema = Joi.object({
   // Basic info
-  title: Joi.string().min(10).max(100).required().messages({
-    'string.min': 'Title must be at least 10 characters long.',
-    'any.required': 'Title is required.',
-  }),
+  title: Joi.string().min(10).max(100).optional(),
   propertyType: Joi.string()
     .valid('boarding_room', 'shared_room', 'annex', 'house', 'apartment', 'hostel', 'studio', 'other')
     .required(),

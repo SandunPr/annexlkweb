@@ -8,6 +8,28 @@ const logger = require('../utils/logger');
 
 class PropertyService {
   /**
+   * Auto-generate SEO-optimized and structured listing title.
+   */
+  async autoGenerateTitle(propertyPayload, locationPayload) {
+    const rawType = propertyPayload.propertyType || '';
+    const formattedType = rawType.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+
+    let cityName = '';
+    if (locationPayload.cityId) {
+      const rows = await db.query('SELECT name FROM cities WHERE id = ?', [locationPayload.cityId]);
+      if (rows.length > 0) {
+        cityName = rows[0].name;
+      }
+    }
+
+    const maxOccupants = propertyPayload.maxOccupants || 1;
+    const occupantsText = `${maxOccupants} Person${maxOccupants > 1 ? 's' : ''}`;
+    const address = locationPayload.addressText ? ` - ${locationPayload.addressText.trim()}` : '';
+
+    return `${formattedType} Available near ${cityName} For ${occupantsText}${address}`;
+  }
+
+  /**
    * Helper to generate a unique listing slug.
    */
   async generateUniqueSlug(title) {
@@ -55,7 +77,8 @@ class PropertyService {
       throw new ValidationError('You must upload exactly three listing photos (main, interior, facility).');
     }
 
-    // 3. Generate slug
+    // 3. Auto-generate title & slug
+    propertyPayload.title = await this.autoGenerateTitle(propertyPayload, locationPayload);
     const slug = await this.generateUniqueSlug(propertyPayload.title);
     propertyPayload.slug = slug;
     propertyPayload.ownerId = userId;
@@ -127,8 +150,20 @@ class PropertyService {
       locationPayload.approxLongitude = approxLongitude;
     }
 
-    // 3. Regenerate slug if title changes
-    if (propertyPayload.title && propertyPayload.title !== property.title) {
+    // 3. Auto-generate and update title/slug
+    const mergedPropertyPayload = {
+      propertyType: propertyPayload.propertyType !== undefined ? propertyPayload.propertyType : property.property_type,
+      maxOccupants: propertyPayload.maxOccupants !== undefined ? propertyPayload.maxOccupants : property.max_occupants
+    };
+    
+    const mergedLocationPayload = {
+      cityId: locationPayload && locationPayload.cityId !== undefined ? locationPayload.cityId : property.city_id,
+      addressText: locationPayload && locationPayload.addressText !== undefined ? locationPayload.addressText : property.address_text
+    };
+
+    propertyPayload.title = await this.autoGenerateTitle(mergedPropertyPayload, mergedLocationPayload);
+
+    if (propertyPayload.title !== property.title) {
       propertyPayload.slug = await this.generateUniqueSlug(propertyPayload.title);
     }
 
