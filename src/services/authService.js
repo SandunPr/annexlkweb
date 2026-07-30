@@ -139,8 +139,8 @@ class AuthService {
 
         // Profile
         await conn.execute(
-          'INSERT INTO user_profiles (user_id, full_name) VALUES (?, ?)',
-          [userId, name]
+          'INSERT INTO user_profiles (user_id, full_name, avatar_url) VALUES (?, ?, ?)',
+          [userId, name, picture || null]
         );
 
         // Auth identity linking Google
@@ -171,6 +171,15 @@ class AuthService {
           [userId, googleUserId]
         );
         logger.info(`Linked Google identity to existing email user. ID: ${userId}`);
+      }
+
+      // Update/sync avatar_url if not set or changed
+      if (picture && (!user.avatar_url || user.avatar_url !== picture)) {
+        await db.query(
+          'UPDATE user_profiles SET avatar_url = ? WHERE user_id = ?',
+          [picture, userId]
+        );
+        user.avatar_url = picture;
       }
     }
 

@@ -7,7 +7,7 @@ class UserRepository {
   async findByEmail(email) {
     const query = `
       SELECT u.id, u.email, u.password_hash, u.kyc_status, u.is_suspended,
-             p.full_name, p.phone_number, p.address, p.date_of_birth,
+             p.full_name, p.phone_number, p.address, p.date_of_birth, p.avatar_url,
              r.name AS role
       FROM users u
       LEFT JOIN user_profiles p ON u.id = p.user_id
@@ -25,7 +25,7 @@ class UserRepository {
   async findById(id) {
     const query = `
       SELECT u.id, u.email, u.kyc_status, u.is_suspended,
-             p.full_name, p.phone_number, p.address, p.date_of_birth,
+             p.full_name, p.phone_number, p.address, p.date_of_birth, p.avatar_url,
              r.name AS role
       FROM users u
       LEFT JOIN user_profiles p ON u.id = p.user_id
