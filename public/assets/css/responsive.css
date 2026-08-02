@@ -466,6 +466,14 @@
     gap: 20px !important;
   }
 
+  /* Override the tablet sidebar columns with one full-width mobile column. */
+  .search-layout {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 0 !important;
+    width: 100%;
+    min-width: 0;
+  }
+
   .dashboard-content,
   .results-container,
   .listing-main,
@@ -516,11 +524,8 @@
 
   /* Search results: show one complete card per swipe on mobile. */
   .results-container .listing-grid {
-    display: grid !important;
+    display: flex !important;
     grid-template-columns: none !important;
-    grid-auto-flow: column;
-    grid-auto-columns: 100%;
-    justify-items: center;
     gap: 16px !important;
     width: 100%;
     padding-inline: 12px;
@@ -540,8 +545,9 @@
 
   .results-container .listing-grid > .listing-card,
   .results-container .listing-grid > .skeleton {
-    width: min(100%, 540px);
-    max-width: 100%;
+    flex: 0 0 100%;
+    width: 100%;
+    max-width: none;
     scroll-snap-align: start;
     scroll-snap-stop: always;
   }
@@ -555,10 +561,7 @@
   }
 
   .results-container .sponsored-strip-track {
-    display: grid;
-    grid-template-columns: none;
-    grid-auto-flow: column;
-    grid-auto-columns: 100%;
+    display: flex;
     gap: 12px;
     width: 100%;
     overflow-x: auto;
@@ -575,6 +578,7 @@
   }
 
   .results-container .sponsored-chip {
+    flex: 0 0 100%;
     width: 100%;
     min-width: 0;
     max-width: 100%;
