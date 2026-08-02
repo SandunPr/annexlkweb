@@ -411,6 +411,30 @@
   gap: var(--space-md) !important;
 }
 
+/* Search results need a list layout before the general mobile breakpoint.
+   This prevents a third card overflowing beside the desktop filter panel. */
+@media (max-width: 1280px) {
+  .search-layout {
+    grid-template-columns: minmax(250px, 300px) minmax(0, 1fr) !important;
+  }
+
+  .results-container {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .results-container .listing-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+    justify-items: center;
+    gap: 20px !important;
+  }
+
+  .results-container .listing-card {
+    width: min(100%, 620px);
+    margin-inline: auto;
+  }
+}
+
 /* ==========================================================================
    Mobile-first finishing layer
    Keep every page within the viewport and turn card grids into readable lists.
@@ -467,6 +491,27 @@
   .listing-card {
     width: 100%;
     min-width: 0;
+    max-width: 540px;
+    margin-inline: auto;
+  }
+
+  .listing-grid {
+    justify-items: center;
+    width: 100%;
+  }
+
+  .results-container .search-header {
+    align-items: center !important;
+    text-align: center;
+  }
+
+  .results-container .search-header > div:last-child {
+    justify-content: center !important;
+    width: 100% !important;
+  }
+
+  .results-container .search-header .form-control {
+    width: min(100%, 260px) !important;
   }
 
   .card-img-container {
