@@ -109,7 +109,7 @@
 
     .facilities-list {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 160px), 1fr));
       gap: 12px;
       margin-top: 16px;
     }
@@ -140,9 +140,13 @@
     
     @media (max-width: 768px) {
       .listing-layout { grid-template-columns: 1fr; }
-      .sticky-contact-bar { display: flex; }
-      .main-layout { padding-bottom: 90px; }
+      /* Sit above the 60px mobile bottom nav bar */
+      .sticky-contact-bar { display: flex; bottom: 60px; }
+      .main-layout { padding-bottom: 150px; }
       .sticky-sidebar { position: static !important; }
+      .info-card { padding: 20px 16px; }
+      .info-title { font-size: 20px; }
+      .price-badge { font-size: 26px; }
     }
     
     #approx-map {

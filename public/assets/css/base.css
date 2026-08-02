@@ -8,6 +8,10 @@
   padding: 0;
 }
 
+html {
+  overflow-x: hidden;
+}
+
 body {
   font-family: var(--font-sans);
   background-color: var(--background);
@@ -16,6 +20,8 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   transition: background-color var(--transition-md), color var(--transition-md);
+  overflow-x: hidden;
+  max-width: 100%;
 }
 
 a {

@@ -168,6 +168,7 @@
     }
     .promo-card {
       flex: 0 0 300px;
+      max-width: calc(100vw - 48px);
       background: var(--surface);
       border: 1px solid var(--surface-border);
       border-radius: var(--radius-lg);
@@ -375,7 +376,7 @@
     <h2 class="text-center mb-20">Find Rentals Near Your University</h2>
     <p class="text-center text-muted mb-20">Proximity search around major Sri Lankan higher education institutes</p>
     
-    <div class="grid grid-3 gap-20 mt-20" style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));">
+    <div class="grid grid-3 gap-20 mt-20" style="grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));">
       <div class="category-card flex align-center gap-20 text-left" style="display: flex; cursor: pointer;" onclick="window.location.href='/pages/search.html?universityId=1'">
         <span style="font-size: 32px;">🎓</span>
         <div>
@@ -421,7 +422,7 @@
   <!-- Trust and Safety Guide -->
   <section class="container mt-40">
     <h2 class="text-center mb-20">Safe & Trustworthy Rental Search</h2>
-    <div class="grid grid-3 gap-20 mt-20" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
+    <div class="grid grid-3 gap-20 mt-20" style="grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));">
       <div class="trust-card">
         <span style="font-size: 24px; display: block; margin-bottom: 12px;">🛡️</span>
         <h3>Verified Property Owners</h3>
@@ -538,7 +539,9 @@
 
       function goTo(page) {
         currentPage = page % items.length;
-        track.style.transform = `translateX(-${currentPage * CARD_W}px)`;
+        const firstCard = track.querySelector('.promo-card');
+        const stepW = firstCard ? firstCard.offsetWidth + 20 : CARD_W;
+        track.style.transform = `translateX(-${currentPage * stepW}px)`;
         dotsEl.querySelectorAll('.promo-dot').forEach((d, i) => d.classList.toggle('active', i === currentPage));
       }
 

@@ -38,7 +38,7 @@ const Navigation = {
       }
 
       actionsHtml = `
-        <a href="/pages/profile.html" class="nav-link flex align-center gap-10">
+        <a href="/pages/profile.html" class="nav-link flex align-center gap-10" style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${user.full_name || 'My Profile'}">
           👤 ${user.full_name || 'My Profile'}
         </a>
         <button id="logout-btn" class="btn btn-outline" style="padding: 6px 12px; font-size: 13px;">Log Out</button>

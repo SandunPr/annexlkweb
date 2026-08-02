@@ -70,7 +70,9 @@
   gap: 12px;
 }
 
-/* Tablet & Mobile Breakpoints */
+/* ==========================================================================
+   Tablet Breakpoint (≤1024px)
+   ========================================================================== */
 @media (max-width: 1024px) {
   .dashboard-layout {
     grid-template-columns: 1fr;
@@ -82,38 +84,79 @@
   }
 }
 
+/* ==========================================================================
+   Mobile Breakpoint (≤768px)
+   ========================================================================== */
 @media (max-width: 768px) {
   :root {
     --header-height: 64px;
   }
 
+  /* ── Navigation ── */
   .app-nav {
-    display: none; /* Hide header nav links on mobile */
+    display: none;
   }
 
   .bottom-nav {
-    display: flex; /* Show bottom bar */
+    display: flex;
   }
 
+  /* Compress header actions so they don't overflow */
+  .nav-actions {
+    gap: 6px !important;
+  }
+  .nav-actions .btn {
+    padding: 6px 10px !important;
+    font-size: 12px !important;
+  }
+
+  /* ── Layout ── */
   .main-layout {
-    padding-bottom: 80px; /* Avoid overlaying bottom nav */
+    padding-bottom: 80px; /* Clear bottom nav */
   }
 
+  /* ── Footer ── */
   .footer-grid {
     grid-template-columns: 1fr 1fr;
-    gap: 30px;
+    gap: 24px;
+  }
+  .footer-bottom {
+    flex-direction: column !important;
+    gap: 8px !important;
+    text-align: center !important;
   }
 
+  /* ── Forms ── */
   .form-row {
     grid-template-columns: 1fr;
     gap: 0;
   }
 
+  /* Form page containers — reduce heavy desktop padding */
+  .form-container,
+  .auth-container,
+  .kyc-form-container {
+    padding: 24px 16px !important;
+    margin: 16px auto !important;
+    border-radius: var(--radius-md) !important;
+  }
+
+  /* Image upload grid — stack to single column on mobile */
+  .file-input-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Facilities checkboxes — 2 column on mobile */
+  .facilities-grid {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 160px), 1fr)) !important;
+  }
+
+  /* ── Visibility helpers ── */
   .hide-mobile {
     display: none !important;
   }
 
-  /* Grids */
+  /* ── Generic Grids ── */
   .grid-3 {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -121,10 +164,12 @@
     grid-template-columns: 1fr;
   }
 
-  /* Dashboards and Sidebars */
+  /* ── Dashboard Sidebars ── */
   .dashboard-sidebar {
     display: none !important;
   }
+
+  /* ── Owner dashboard listing manage items ── */
   .manage-list-item {
     flex-direction: column !important;
     align-items: stretch !important;
@@ -138,7 +183,7 @@
     width: 100% !important;
   }
 
-  /* Admin Dashboard Components */
+  /* ── Admin Dashboard: Tab bar scrolls horizontally ── */
   .admin-tabs {
     overflow-x: auto !important;
     white-space: nowrap !important;
@@ -153,7 +198,29 @@
     font-size: 13px !important;
   }
 
-  /* Search Page Components */
+  /* ── Admin/Data Tables: horizontal scroll on mobile ── */
+  .data-table-container {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  .data-table {
+    min-width: 600px; /* Keep table readable, let container scroll */
+  }
+
+  /* KYC document image preview — stack vertically */
+  .kyc-doc-preview {
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+  .doc-img {
+    max-width: 100% !important;
+    width: 100% !important;
+    height: auto !important;
+    max-height: 200px !important;
+    object-fit: cover !important;
+  }
+
+  /* ── Search page ── */
   .search-layout {
     grid-template-columns: 1fr !important;
   }
@@ -168,7 +235,7 @@
     width: 100% !important;
   }
 
-  /* Home Hero Section */
+  /* ── Home: Hero search box ── */
   .hero-title {
     font-size: 28px !important;
   }
@@ -195,24 +262,25 @@
   .hero-search-box button[type="submit"] {
     width: 100% !important;
     height: 48px !important;
-    font-size: clamp(14px, 1.5vw, 16px) !important;
   }
   .category-section {
     margin-top: 20px !important;
   }
 
-  /* CTA Banner */
+  /* ── Home: CTA banner ── */
   .cta-banner {
     flex-direction: column !important;
     text-align: center !important;
     gap: 20px !important;
     padding: 30px 20px !important;
   }
+  .cta-banner a,
   .cta-banner button {
     width: 100% !important;
+    text-align: center !important;
   }
 
-  /* Listing Details Page */
+  /* ── Listing detail page ── */
   .listing-layout {
     grid-template-columns: 1fr !important;
     gap: 30px !important;
@@ -220,23 +288,51 @@
   .gallery-container {
     height: 280px !important;
   }
+
+  /* Sticky contact bar sits above the 60px bottom nav */
+  .sticky-contact-bar {
+    bottom: 60px !important;
+  }
+
+  /* Sticky sidebar becomes static on mobile */
+  .sticky-sidebar {
+    position: static !important;
+  }
 }
 
+/* ==========================================================================
+   Small Mobile Breakpoint (≤480px)
+   ========================================================================== */
 @media (max-width: 480px) {
   .footer-grid {
     grid-template-columns: 1fr;
-  }
-
-  .btn {
-    width: 100%; /* Full width buttons for mobile touch targets */
   }
 
   .app-logo {
     font-size: 20px;
   }
 
-  .grid-2, .grid-3 {
+  .grid-2,
+  .grid-3 {
     grid-template-columns: 1fr !important;
+  }
+
+  /* Promo carousel cards fill the screen width on tiny phones */
+  .promo-card {
+    flex: 0 0 calc(100vw - 48px) !important;
+    max-width: calc(100vw - 48px) !important;
+  }
+
+  /* Info cards on listing page — reduce padding */
+  .info-card {
+    padding: 20px 16px !important;
+  }
+
+  /* Pagination controls wrap nicely */
+  #pagination {
+    flex-direction: column !important;
+    gap: 12px !important;
+    align-items: center !important;
   }
 }
 

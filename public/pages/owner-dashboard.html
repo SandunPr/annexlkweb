@@ -15,7 +15,7 @@
   <style>
     .metrics-row {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr));
       gap: 20px;
       margin-bottom: 40px;
     }
@@ -62,7 +62,8 @@
       display: flex;
       flex-direction: column;
       gap: 8px;
-      min-width: 180px;
+      min-width: 140px;
+      flex-shrink: 0;
     }
   </style>
 </head>
