@@ -264,7 +264,7 @@
     height: 48px !important;
   }
   .category-section {
-    margin-top: 20px !important;
+    margin-top: 30px !important;
   }
 
   /* ── Home: CTA banner ── */
@@ -409,4 +409,169 @@
   display: grid !important;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 285px), 1fr)) !important;
   gap: var(--space-md) !important;
+}
+
+/* ==========================================================================
+   Mobile-first finishing layer
+   Keep every page within the viewport and turn card grids into readable lists.
+   ========================================================================== */
+@media (max-width: 768px) {
+  html {
+    scroll-padding-bottom: 80px;
+  }
+
+  body {
+    min-width: 0;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 100%;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+    
+  }
+
+  .main-layout {
+    padding-top: 24px !important;
+    padding-bottom: 88px !important;
+  }
+
+  .dashboard-layout {
+    padding: 0 !important;
+    gap: 20px !important;
+  }
+
+  .dashboard-content,
+  .results-container,
+  .listing-main,
+  .listing-sidebar {
+    min-width: 0;
+    width: 100%;
+  }
+
+  /* A phone uses one consistent list column, including inline grid declarations. */
+  .grid-2,
+  .grid-3,
+  .grid-4,
+  .grid-fluid,
+  .listing-grid,
+  .metrics-row,
+  .role-cards,
+  .facilities-grid,
+  .file-input-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 16px !important;
+  }
+
+  .listing-card {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .card-img-container {
+    height: clamp(190px, 56vw, 260px);
+  }
+
+  .card-content {
+    padding: 16px;
+  }
+
+  .section-header,
+  .profile-header,
+  .search-header,
+  .cta-banner {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .section-header > *,
+  .search-header > *,
+  .profile-header > * {
+    min-width: 0;
+  }
+
+  .filters-sidebar {
+    display: none !important;
+  }
+
+  .form-container,
+  .auth-container,
+  .kyc-form-container,
+  .info-card,
+  .metric-card,
+  .switch-container {
+    width: 100%;
+    max-width: 100%;
+    padding: 20px 16px !important;
+  }
+
+  .form-group[style*="grid-column"] {
+    grid-column: auto !important;
+  }
+
+  input,
+  select,
+  textarea,
+  button {
+    max-width: 100%;
+  }
+
+  .app-footer {
+    margin-top: 32px;
+    padding: 36px 0 88px;
+  }
+
+  .footer-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 24px;
+    margin-bottom: 28px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+  }
+
+  .header-container {
+    gap: 8px;
+  }
+
+  .nav-actions {
+    min-width: 0;
+  }
+
+  .nav-actions .btn {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+
+  .hero-search-box,
+  .search-header,
+  .sponsored-strip {
+    padding: 16px !important;
+  }
+
+  .manage-list-item {
+    gap: 14px !important;
+    padding: 14px !important;
+  }
+
+  .manage-thumb {
+    height: clamp(170px, 54vw, 230px) !important;
+  }
+
+  .manage-actions,
+  .manage-actions .btn,
+  .cta-banner .btn {
+    width: 100% !important;
+  }
+
+  .modal-container {
+    width: calc(100% - 28px);
+    max-height: calc(100dvh - 28px);
+    margin: 14px;
+  }
 }
