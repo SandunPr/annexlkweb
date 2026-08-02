@@ -411,6 +411,21 @@
   gap: var(--space-md) !important;
 }
 
+/* Search results use a stable three-card row on desktop. */
+@media (min-width: 1025px) {
+  .results-container .listing-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+    width: 100%;
+  }
+
+  .results-container .listing-card {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
 /* Keep the desktop filter/results columns shrink-safe without changing
    the normal multi-card desktop listing grid. */
 @media (max-width: 1280px) {
