@@ -514,6 +514,91 @@
     width: min(100%, 260px) !important;
   }
 
+  /* Search results: show one complete card per swipe on mobile. */
+  .results-container .listing-grid {
+    display: grid !important;
+    grid-template-columns: none !important;
+    grid-auto-flow: column;
+    grid-auto-columns: 100%;
+    justify-items: center;
+    gap: 16px !important;
+    width: 100%;
+    padding-inline: 12px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: 12px;
+    scroll-behavior: smooth;
+    overscroll-behavior-inline: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .results-container .listing-grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .results-container .listing-grid > .listing-card,
+  .results-container .listing-grid > .skeleton {
+    width: min(100%, 540px);
+    max-width: 100%;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+
+  /* Match the sponsored carousel to the listing slider width. */
+  .results-container .sponsored-strip {
+    width: min(100%, 540px);
+    max-width: 100%;
+    margin: 0 auto 20px !important;
+    padding: 14px !important;
+  }
+
+  .results-container .sponsored-strip-track {
+    display: grid;
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: 100%;
+    gap: 12px;
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    overscroll-behavior-inline: contain;
+    -webkit-overflow-scrolling: touch;
+    animation: none !important;
+  }
+
+  .results-container .sponsored-strip-header {
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+
+  .results-container .sponsored-chip {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    scroll-snap-align: center;
+    scroll-snap-stop: always;
+  }
+
+  .results-container .sponsored-chip-info {
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .results-container .sponsored-chip-info strong,
+  .results-container .sponsored-chip-info span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .results-container .sponsored-chip-rent {
+    flex: 0 0 auto;
+    margin-left: auto;
+  }
+
   .card-img-container {
     height: clamp(190px, 56vw, 260px);
   }
