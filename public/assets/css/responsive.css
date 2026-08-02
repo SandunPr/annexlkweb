@@ -411,8 +411,8 @@
   gap: var(--space-md) !important;
 }
 
-/* Search results need a list layout before the general mobile breakpoint.
-   This prevents a third card overflowing beside the desktop filter panel. */
+/* Keep the desktop filter/results columns shrink-safe without changing
+   the normal multi-card desktop listing grid. */
 @media (max-width: 1280px) {
   .search-layout {
     grid-template-columns: minmax(250px, 300px) minmax(0, 1fr) !important;
@@ -421,17 +421,6 @@
   .results-container {
     min-width: 0;
     width: 100%;
-  }
-
-  .results-container .listing-grid {
-    grid-template-columns: minmax(0, 1fr) !important;
-    justify-items: center;
-    gap: 20px !important;
-  }
-
-  .results-container .listing-card {
-    width: min(100%, 620px);
-    margin-inline: auto;
   }
 }
 
