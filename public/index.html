@@ -34,16 +34,32 @@
     }
 
     .hero-title {
-      font-size: 42px;
       font-weight: 700;
       margin-bottom: 16px;
-      line-height: 1.2;
+      line-height: 1.08;
+      color: #0c4a6e;
+    }
+
+    .hero-title-primary,
+    .hero-title-secondary,
+    .hero-subtitle-line {
+      display: block;
+    }
+
+    .hero-title-primary {
+      font-size: 58px;
+    }
+
+    .hero-title-secondary {
+      font-size: 44px;
+      margin-top: 8px;
     }
 
     .hero-subtitle {
-      font-size: 18px;
-      color: rgba(255, 255, 255, 0.85);
+      font-size: 21px;
+      color: #0c4a6e;
       margin-bottom: 40px;
+      line-height: 1.5;
     }
 
     /* Search Box Container */
@@ -329,9 +345,14 @@
   <!-- Hero Section -->
   <section class="hero-section">
     <div class="container">
-      <h1 class="hero-title">Find Your Perfect Boarding Room, Annex or House</h1>
-      <p class="hero-subtitle">Discover verified student and worker boarding rooms near major universities and cities in
-        Sri Lanka</p>
+      <h1 class="hero-title">
+        <span class="hero-title-primary">Find Your Perfect</span>
+        <span class="hero-title-secondary">Boarding Room, Annex or House</span>
+      </h1>
+      <p class="hero-subtitle">
+        <span class="hero-subtitle-line">Discover verified student and worker boarding rooms</span>
+        <span class="hero-subtitle-line">near major universities and cities in Sri Lanka</span>
+      </p>
 
       <!-- Hero Search Bar Form -->
       <form id="hero-search-form" class="hero-search-box">
