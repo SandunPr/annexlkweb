@@ -36,8 +36,8 @@
 }
 
 .app-logo-image {
-  width: min(660px, 48vw);
-  height: 174px;
+  width: min(480px, 48vw);
+  height: 126px;
   object-fit: contain;
 }
 
