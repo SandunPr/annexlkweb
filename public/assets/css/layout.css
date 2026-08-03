@@ -5,8 +5,7 @@
   position: sticky;
   top: 0;
   z-index: 100;
-  height: auto;
-  min-height: var(--header-height);
+  height: var(--header-height);
   background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -19,7 +18,7 @@
 }
 
 .header-container {
-  min-height: var(--header-height);
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -36,10 +35,10 @@
   text-decoration: none;
 }
 
+
 .app-logo-image {
-  width: min(480px, 48vw);
-  height: 126px;
-  object-fit: contain;
+  width: min(320px, 42vw);
+  height: auto;
 }
 
 .app-nav {

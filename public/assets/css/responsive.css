@@ -319,8 +319,8 @@
   }
 
   .app-logo-image {
-    width: min(414px, 72vw);
-    height: 108px;
+    width: min(220px, 58vw);
+    height: auto;
   }
 
   .hero-title-primary {
