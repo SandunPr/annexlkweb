@@ -6,8 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AnnexLK — Sri Lanka's Trusted Property Discovery Platform</title>
   <link rel="icon" type="image/svg+xml" href="/assets/images/branding/favicon.svg">
-  <link rel="preload" href="/assets/images/branding/banner.svg" as="image" type="image/svg+xml" fetchpriority="high">
-  <link rel="preload" href="/assets/images/branding/siteicon.svg" as="image" type="image/svg+xml">
+  <link rel="preload" href="/assets/images/branding/banner.svg?v=20260803" as="image" type="image/svg+xml" fetchpriority="high">
+  <link rel="preload" href="/assets/images/branding/siteicon.svg?v=20260803" as="image" type="image/svg+xml">
   <link rel="preload" href="/assets/images/icons/boarding_rooms.svg" as="image" type="image/svg+xml">
   <link rel="preload" href="/assets/images/icons/annexes.svg" as="image" type="image/svg+xml">
   <link rel="preload" href="/assets/images/icons/apartments.svg" as="image" type="image/svg+xml">
@@ -23,7 +23,10 @@
   <style>
     /* Hero section styles */
     .hero-section {
-      background: url('/assets/images/branding/banner.svg') center/cover no-repeat;
+      background-image: url('/assets/images/branding/banner.svg?v=20260803');
+      background-position: center;
+      background-size: cover;
+      background-repeat: no-repeat;
       padding: 100px 0 120px 0;
       color: white;
       text-align: center;
@@ -518,7 +521,7 @@
 
   <!-- App scripts module initialization -->
   <script type="module">
-    import Navigation from '/assets/js/utils/navigation.js';
+    import Navigation from '/assets/js/utils/navigation.js?v=20260803';
     import client from '/assets/js/api/client.js';
 
     document.addEventListener('DOMContentLoaded', async () => {
