@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /pages/admin/
+Disallow: /pages/profile.html
+Disallow: /pages/favourites.html
+Disallow: /pages/owner-dashboard.html
+Disallow: /pages/create-listing.html
+Disallow: /pages/edit-listing.html
+Disallow: /pages/kyc.html
+
+Sitemap: https://annexlk.com/sitemap.xml

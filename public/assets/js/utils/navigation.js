@@ -110,18 +110,18 @@ const Navigation = {
           <div class="footer-links">
             <h4>Safety & Policy</h4>
             <ul>
-              <li><a href="#">Safety Guidelines</a></li>
-              <li><a href="#">Terms & Conditions</a></li>
-              <li><a href="#">Privacy Policy</a></li>
+              <li><a href="/pages/terms.html">Terms &amp; Conditions</a></li>
+              <li><a href="/pages/privacy.html">Privacy Policy</a></li>
+              <li><a href="/pages/cookies.html">Cookie Policy</a></li>
             </ul>
           </div>
 
           <div class="footer-links">
             <h4>About Us</h4>
             <ul>
-              <li><a href="#">About AnnexLK</a></li>
-              <li><a href="#">Contact Us</a></li>
-              <li><a href="#">FAQ Help Desk</a></li>
+              <li><a href="/pages/about.html">About AnnexLK</a></li>
+              <li><a href="/pages/contact.html">Contact Us</a></li>
+              <li><a href="/pages/search.html">Browse Properties</a></li>
             </ul>
           </div>
         </div>
