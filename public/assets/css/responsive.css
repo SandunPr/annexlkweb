@@ -319,7 +319,7 @@
   }
 
   .app-logo-image {
-    width: min(220px, 58vw);
+    width: min(135px, 42vw);
     height: auto;
   }
 
