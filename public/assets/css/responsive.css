@@ -312,6 +312,11 @@
     font-size: 20px;
   }
 
+  .app-logo-image {
+    width: 138px;
+    height: 36px;
+  }
+
   .grid-2,
   .grid-3 {
     grid-template-columns: 1fr !important;
