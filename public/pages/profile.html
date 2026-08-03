@@ -207,6 +207,17 @@
           document.getElementById('profile-phone').value = profile.phone_number || '';
           document.getElementById('profile-address').value = profile.address || '';
           displayAvatar(profile.avatar_url);
+
+          // Keep the shared navigation/session user in sync with the authoritative profile.
+          const sessionUser = Session.getUser();
+          if (sessionUser) {
+            sessionUser.full_name = profile.full_name;
+            sessionUser.phone_number = profile.phone_number;
+            sessionUser.kyc_status = profile.kyc_status;
+            sessionUser.avatar_url = profile.avatar_url;
+            Session.save(sessionUser, Session.getToken());
+            Navigation.init();
+          }
           
           if (profile.date_of_birth) {
             // format date YYYY-MM-DD
