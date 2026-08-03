@@ -8,4 +8,4 @@ Disallow: /pages/create-listing.html
 Disallow: /pages/edit-listing.html
 Disallow: /pages/kyc.html
 
-Sitemap: https://annexlk.com/sitemap.xml
+Sitemap: https://annexlkweb.ekafy.com/sitemap.xml
