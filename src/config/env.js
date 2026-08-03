@@ -29,6 +29,7 @@ function validateEnv() {
 
   // Ensure directories configuration exist
   process.env.LISTING_STORAGE_PATH = process.env.LISTING_STORAGE_PATH || './storage/public/listings';
+  process.env.AVATAR_STORAGE_PATH = process.env.AVATAR_STORAGE_PATH || './storage/public/avatars';
   process.env.KYC_STORAGE_PATH = process.env.KYC_STORAGE_PATH || './storage/private/kyc';
   process.env.TEMP_STORAGE_PATH = process.env.TEMP_STORAGE_PATH || './storage/temporary';
 }

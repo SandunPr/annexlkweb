@@ -31,6 +31,11 @@
       border: 1px solid var(--surface-border);
       margin-bottom: 24px;
     }
+    .avatar-editor { display: flex; align-items: center; gap: 22px; padding-bottom: 26px; margin-bottom: 28px; border-bottom: 1px solid var(--surface-border); }
+    .profile-avatar { width: 104px; height: 104px; border-radius: var(--radius-full); object-fit: cover; border: 4px solid var(--surface); box-shadow: 0 0 0 2px var(--surface-border), var(--shadow-md); background: var(--primary-light); }
+    .avatar-placeholder { display: flex; align-items: center; justify-content: center; font-size: 42px; color: var(--primary); }
+    .avatar-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+    @media (max-width: 520px) { .avatar-editor { align-items: flex-start; } .profile-avatar { width: 84px; height: 84px; } }
   </style>
 </head>
 <body>
@@ -43,7 +48,8 @@
         <!-- Sidebar Navigation -->
         <aside class="dashboard-sidebar">
           <div class="profile-card" style="padding: 20px; text-align: center; margin-bottom: 20px;">
-            <div style="font-size: 64px; margin-bottom: 12px;">👤</div>
+            <div id="sidebar-avatar-placeholder" class="avatar-placeholder profile-avatar" style="margin: 0 auto 14px;">👤</div>
+            <img id="sidebar-avatar" class="profile-avatar hidden" style="margin: 0 auto 14px;" alt="Your profile picture" referrerpolicy="no-referrer">
             <h3 id="sidebar-name">Loading...</h3>
             <p id="sidebar-role" class="badge badge-primary mt-10">...</p>
           </div>
@@ -59,6 +65,19 @@
         <!-- Main Content Area -->
         <section class="dashboard-content">
           <div class="profile-card">
+            <section class="avatar-editor" aria-labelledby="avatar-heading">
+              <div id="avatar-preview-placeholder" class="profile-avatar avatar-placeholder" aria-hidden="true">👤</div>
+              <img id="avatar-preview" class="profile-avatar hidden" alt="Profile picture preview" referrerpolicy="no-referrer">
+              <div>
+                <h2 id="avatar-heading">Profile Picture</h2>
+                <p class="text-muted" style="font-size:13px; margin-top:5px;">Google profile pictures are added automatically. You can also upload a JPEG, PNG or WebP image up to 5 MB.</p>
+                <div class="avatar-actions">
+                  <label for="avatar-input" class="btn btn-outline" style="cursor:pointer;">Choose picture</label>
+                  <input id="avatar-input" type="file" accept="image/jpeg,image/png,image/webp" class="hidden">
+                  <button id="avatar-upload-btn" type="button" class="btn btn-primary hidden">Save picture</button>
+                </div>
+              </div>
+            </section>
             <h2 class="mb-20">Account Trust Level</h2>
             
             <!-- Trust Badge Section -->
@@ -144,6 +163,28 @@
       }
 
       const user = Session.getUser();
+
+      function displayAvatar(url) {
+        const preview = document.getElementById('avatar-preview');
+        const previewPlaceholder = document.getElementById('avatar-preview-placeholder');
+        const sidebarAvatar = document.getElementById('sidebar-avatar');
+        const sidebarPlaceholder = document.getElementById('sidebar-avatar-placeholder');
+        if (url) {
+          preview.src = url;
+          sidebarAvatar.src = url;
+          preview.classList.remove('hidden');
+          sidebarAvatar.classList.remove('hidden');
+          previewPlaceholder.classList.add('hidden');
+          sidebarPlaceholder.classList.add('hidden');
+        } else {
+          preview.classList.add('hidden');
+          sidebarAvatar.classList.add('hidden');
+          previewPlaceholder.classList.remove('hidden');
+          sidebarPlaceholder.classList.remove('hidden');
+        }
+      }
+
+      displayAvatar(user.avatar_url);
       
       // Update sidebar
       document.getElementById('sidebar-name').innerText = user.full_name || 'My Profile';
@@ -165,6 +206,7 @@
           document.getElementById('profile-name').value = profile.full_name || '';
           document.getElementById('profile-phone').value = profile.phone_number || '';
           document.getElementById('profile-address').value = profile.address || '';
+          displayAvatar(profile.avatar_url);
           
           if (profile.date_of_birth) {
             // format date YYYY-MM-DD
@@ -176,6 +218,54 @@
       } catch (err) {
         UI.showToast('Failed to load profile details: ' + err.message, 'error');
       }
+
+      const avatarInput = document.getElementById('avatar-input');
+      const avatarUploadBtn = document.getElementById('avatar-upload-btn');
+      let pendingAvatarUrl = null;
+
+      avatarInput.addEventListener('change', () => {
+        const file = avatarInput.files[0];
+        if (!file) return;
+        if (file.size > 5 * 1024 * 1024) {
+          avatarInput.value = '';
+          UI.showToast('Profile picture must be 5 MB or smaller.', 'warning');
+          return;
+        }
+        if (pendingAvatarUrl) URL.revokeObjectURL(pendingAvatarUrl);
+        pendingAvatarUrl = URL.createObjectURL(file);
+        displayAvatar(pendingAvatarUrl);
+        avatarUploadBtn.classList.remove('hidden');
+      });
+
+      avatarUploadBtn.addEventListener('click', async () => {
+        const file = avatarInput.files[0];
+        if (!file) return;
+        avatarUploadBtn.disabled = true;
+        avatarUploadBtn.innerText = 'Uploading...';
+        const formData = new FormData();
+        formData.append('avatar', file);
+        try {
+          const res = await client.post('profile/avatar', formData);
+          if (res.success) {
+            const localUser = Session.getUser();
+            localUser.avatar_url = res.data.avatar_url;
+            Session.save(localUser, Session.getToken());
+            if (pendingAvatarUrl) URL.revokeObjectURL(pendingAvatarUrl);
+            pendingAvatarUrl = null;
+            displayAvatar(res.data.avatar_url);
+            avatarInput.value = '';
+            avatarUploadBtn.classList.add('hidden');
+            UI.showToast('Profile picture updated successfully!', 'success');
+            Navigation.init();
+          }
+        } catch (err) {
+          displayAvatar(Session.getUser().avatar_url);
+          UI.showToast(err.message || 'Failed to upload profile picture.', 'error');
+        } finally {
+          avatarUploadBtn.disabled = false;
+          avatarUploadBtn.innerText = 'Save picture';
+        }
+      });
 
       // Update Trust Indicators
       function updateTrustUI(status, phone) {

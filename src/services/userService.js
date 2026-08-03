@@ -2,6 +2,7 @@ const userRepository = require('../repositories/userRepository');
 const db = require('../config/db');
 const { NotFoundError, ValidationError, ForbiddenError } = require('../utils/errors');
 const logger = require('../utils/logger');
+const { processAvatar, deleteLocalAvatar } = require('../utils/avatarProcessor');
 
 class UserService {
   /**
@@ -33,6 +34,30 @@ class UserService {
 
     await userRepository.updateProfile(userId, profileData);
     logger.info(`Profile updated for user ID: ${userId}`);
+    return await this.getProfile(userId);
+  }
+
+  async uploadAvatar(userId, file) {
+    if (!file || !file.buffer) {
+      throw new ValidationError('Please choose a JPEG, PNG or WebP profile picture.');
+    }
+
+    const currentProfile = await this.getProfile(userId);
+    let avatarUrl;
+
+    try {
+      avatarUrl = await processAvatar(userId, file.buffer);
+      await userRepository.updateAvatar(userId, avatarUrl);
+    } catch (error) {
+      if (avatarUrl) await deleteLocalAvatar(avatarUrl).catch(() => {});
+      throw error;
+    }
+
+    await deleteLocalAvatar(currentProfile.avatar_url).catch((error) => {
+      logger.warn(`Could not remove previous avatar for user ${userId}: ${error.message}`);
+    });
+
+    logger.info(`Avatar updated for user ID: ${userId}`);
     return await this.getProfile(userId);
   }
 

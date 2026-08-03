@@ -64,6 +64,15 @@
   gap: 16px;
 }
 
+.nav-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-full);
+  object-fit: cover;
+  border: 2px solid var(--surface-border);
+  flex: 0 0 auto;
+}
+
 /* Footer Layout */
 .app-footer {
   background-color: var(--surface);

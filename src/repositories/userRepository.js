@@ -109,6 +109,10 @@ class UserRepository {
     await db.query(query, params);
   }
 
+  async updateAvatar(userId, avatarUrl) {
+    await db.query('UPDATE user_profiles SET avatar_url = ? WHERE user_id = ?', [avatarUrl, userId]);
+  }
+
   /**
    * Update KYC Status.
    */

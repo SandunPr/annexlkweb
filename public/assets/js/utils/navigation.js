@@ -29,6 +29,9 @@ const Navigation = {
     let actionsHtml = '';
 
     if (user) {
+      const avatarHtml = user.avatar_url
+        ? `<img src="${user.avatar_url}" class="nav-avatar" alt="" referrerpolicy="no-referrer">`
+        : `<span aria-hidden="true">👤</span>`;
       if (user.role === 'ADMINISTRATOR') {
         navLinksHtml += `<a href="/pages/admin/dashboard.html" class="nav-link">Admin Admin Panel</a>`;
       } else if (user.role === 'PROPERTY_OWNER') {
@@ -39,7 +42,7 @@ const Navigation = {
 
       actionsHtml = `
         <a href="/pages/profile.html" class="nav-link flex align-center gap-10" style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${user.full_name || 'My Profile'}">
-          👤 ${user.full_name || 'My Profile'}
+          ${avatarHtml} ${user.full_name || 'My Profile'}
         </a>
         <button id="logout-btn" class="btn btn-outline" style="padding: 6px 12px; font-size: 13px;">Log Out</button>
       `;

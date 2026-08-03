@@ -36,6 +36,22 @@ class ProfileController {
   }
 
   /**
+   * POST /api/v1/profile/avatar
+   */
+  async uploadAvatar(req, res, next) {
+    try {
+      const updated = await userService.uploadAvatar(req.user.id, req.file);
+      res.status(200).json({
+        success: true,
+        message: 'Profile picture updated successfully.',
+        data: updated,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
    * POST /api/v1/profile/verify-phone
    */
   async requestPhoneVerification(req, res, next) {

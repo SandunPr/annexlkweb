@@ -173,8 +173,9 @@ class AuthService {
         logger.info(`Linked Google identity to existing email user. ID: ${userId}`);
       }
 
-      // Update/sync avatar_url if not set or changed
-      if (picture && (!user.avatar_url || user.avatar_url !== picture)) {
+      // Keep Google's picture current unless the user chose a locally uploaded avatar.
+      const hasManualAvatar = user.avatar_url && user.avatar_url.startsWith('/media/avatars/');
+      if (picture && !hasManualAvatar && user.avatar_url !== picture) {
         await db.query(
           'UPDATE user_profiles SET avatar_url = ? WHERE user_id = ?',
           [picture, userId]
