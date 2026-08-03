@@ -56,7 +56,7 @@ const Navigation = {
     headerEl.innerHTML = `
       <div class="container header-container">
         <a href="/index.html" class="app-logo">
-          <img src="/assets/images/branding/siteicon.svg?v=20260803-2" alt="AnnexLK logo" class="app-logo-image" width="150" height="40" loading="eager" decoding="async" fetchpriority="high">
+          <img src="/assets/images/branding/siteicon.svg?v=20260803-3" alt="AnnexLK logo" class="app-logo-image" width="150" height="40" style="width:min(150px, 34vw); height:auto; max-height:40px;" loading="eager" decoding="async" fetchpriority="high">
         </a>
         
         <nav class="app-nav">
