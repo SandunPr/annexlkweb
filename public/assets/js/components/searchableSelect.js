@@ -18,10 +18,15 @@ export function initSearchableSelects(selector = 'select[data-searchable]') {
     list.className = 'searchable-select-list hidden';
     list.setAttribute('role', 'listbox');
     const options = Array.from(select.options);
+    const emptyOption = options.find((option) => option.value === '');
+
+    // An empty option describes the unfiltered state; show it as a hint instead
+    // of making its label part of the user's search query.
+    input.placeholder = emptyOption?.textContent.trim() || 'Type to search';
 
     const syncInput = () => {
       const selected = select.options[select.selectedIndex];
-      input.value = selected ? selected.textContent.trim() : '';
+      input.value = selected && selected.value ? selected.textContent.trim() : '';
     };
 
     const close = () => {
@@ -61,7 +66,12 @@ export function initSearchableSelects(selector = 'select[data-searchable]') {
       input.setAttribute('aria-expanded', 'true');
     };
 
-    input.addEventListener('focus', () => render(''));
+    input.addEventListener('focus', () => {
+      render('');
+      // A city that is already selected should be replaced by the next typed
+      // query, rather than having the query appended to its label.
+      input.select();
+    });
     input.addEventListener('input', () => render(input.value));
     input.addEventListener('keydown', (event) => {
       if (event.key === 'Escape') {
