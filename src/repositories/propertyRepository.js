@@ -87,7 +87,7 @@ class PropertyRepository {
     const placeholders = ids.map(() => '?').join(', ');
     const query = `
       SELECT p.id, p.title, p.slug, p.property_type, p.rent, p.bills_included,
-             p.max_occupants, p.furnished_status, p.status,
+             p.preferred_gender, p.max_occupants, p.furnished_status, p.status,
              pl.approx_latitude, pl.approx_longitude, pl.address_text,
              c.name AS city_name, d.name AS district_name,
              pi.thumbnail_path AS main_thumbnail,
@@ -117,8 +117,8 @@ class PropertyRepository {
       // 1. Insert into properties
       const [propResult] = await conn.execute(
         `INSERT INTO properties 
-          (owner_id, title, slug, description, property_type, rent, deposit, advance_months, bills_included, available_date, min_duration_months, furnished_status, occupancy_type, max_occupants, current_occupants, status, last_confirmed_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'PENDING_REVIEW', NOW())`,
+          (owner_id, title, slug, description, property_type, rent, deposit, advance_months, bills_included, available_date, min_duration_months, furnished_status, occupancy_type, preferred_gender, max_occupants, current_occupants, status, last_confirmed_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'PENDING_REVIEW', NOW())`,
         [
           propertyData.ownerId,
           propertyData.title,
@@ -133,6 +133,7 @@ class PropertyRepository {
           propertyData.minDurationMonths || 1,
           propertyData.furnishedStatus || 'UNFURNISHED',
           propertyData.occupancyType || 'INDIVIDUAL',
+          propertyData.preferredGender || 'ANY',
           propertyData.maxOccupants || 1,
           propertyData.currentOccupants || 0,
         ]
@@ -224,7 +225,7 @@ class PropertyRepository {
       const updatablePropKeys = [
         'title', 'slug', 'description', 'propertyType', 'rent', 'deposit', 'advanceMonths',
         'billsIncluded', 'availableDate', 'minDurationMonths', 'furnishedStatus',
-        'occupancyType', 'maxOccupants', 'currentOccupants', 'status'
+        'occupancyType', 'preferredGender', 'maxOccupants', 'currentOccupants', 'status'
       ];
 
       // Map camelCase fields to snake_case db columns
@@ -236,6 +237,7 @@ class PropertyRepository {
         minDurationMonths: 'min_duration_months',
         furnishedStatus: 'furnished_status',
         occupancyType: 'occupancy_type',
+        preferredGender: 'preferred_gender',
         maxOccupants: 'max_occupants',
         currentOccupants: 'current_occupants',
       };
@@ -360,7 +362,7 @@ class PropertyRepository {
       SELECT p.id, p.title, p.slug, p.property_type, p.description,
              p.rent, p.deposit, p.advance_months, p.bills_included,
              p.available_date, p.min_duration_months, p.furnished_status,
-             p.occupancy_type, p.max_occupants, p.current_occupants,
+             p.occupancy_type, p.preferred_gender, p.max_occupants, p.current_occupants,
              p.status, p.last_confirmed_at, p.views_count, p.favourites_count, p.contact_clicks_count,
              pl.city_id, pl.address_text, pl.exact_latitude AS latitude, pl.exact_longitude AS longitude,
              pl.approx_latitude, pl.approx_longitude, pl.google_place_id,
@@ -389,7 +391,7 @@ class PropertyRepository {
   async search(filters, { limit = 20, offset = 0 }) {
     const selectFields = [
       'p.id', 'p.title', 'p.slug', 'p.property_type', 'p.rent', 'p.deposit', 'p.bills_included',
-      'p.available_date', 'p.furnished_status', 'p.occupancy_type', 'p.max_occupants', 'p.current_occupants',
+      'p.available_date', 'p.furnished_status', 'p.occupancy_type', 'p.preferred_gender', 'p.max_occupants', 'p.current_occupants',
       'p.status', 'p.views_count', 'p.favourites_count', 'p.last_confirmed_at', 'p.created_at',
       'pl.approx_latitude', 'pl.approx_longitude', 'pl.address_text', 'c.name AS city_name', 'd.name AS district_name',
       'pi.thumbnail_path AS main_thumbnail', 'u.kyc_status AS owner_kyc_status'
@@ -465,6 +467,10 @@ class PropertyRepository {
     if (filters.propertyType) {
       whereClauses.push('p.property_type = ?');
       queryParams.push(filters.propertyType);
+    }
+    if (filters.preferredGender) {
+      whereClauses.push("p.preferred_gender IN (?, 'ANY')");
+      queryParams.push(filters.preferredGender);
     }
     if (filters.minRent) {
       whereClauses.push('p.rent >= ?');
@@ -629,6 +635,10 @@ class PropertyRepository {
     if (filters.propertyType) {
       whereClauses.push('p.property_type = ?');
       queryParams.push(filters.propertyType);
+    }
+    if (filters.preferredGender) {
+      whereClauses.push("p.preferred_gender IN (?, 'ANY')");
+      queryParams.push(filters.preferredGender);
     }
     if (filters.minRent) {
       whereClauses.push('p.rent >= ?');

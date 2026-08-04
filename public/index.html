@@ -5,6 +5,39 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AnnexLK — Sri Lanka's Trusted Property Discovery Platform</title>
+  <meta name="description" content="Find annexes, boarding rooms, apartments and rental homes across Sri Lanka. Browse trusted property listings by location, rent and tenant preference on AnnexLK.">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <link rel="canonical" href="https://annexlk.lk/">
+  <meta property="og:title" content="AnnexLK | Find Rental Properties in Sri Lanka">
+  <meta property="og:description" content="Discover trusted annexes, boarding rooms, apartments and rental homes across Sri Lanka.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://annexlk.lk/">
+  <meta property="og:site_name" content="AnnexLK">
+  <meta property="og:image" content="https://annexlk.lk/assets/images/branding/banner.svg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="AnnexLK | Find Rental Properties in Sri Lanka">
+  <meta name="twitter:description" content="Search trusted rental properties across Sri Lanka by location, rent and preference.">
+  <meta name="twitter:image" content="https://annexlk.lk/assets/images/branding/banner.svg">
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "AnnexLK",
+      "url": "https://annexlk.lk/",
+      "description": "Sri Lankan rental property discovery platform for annexes, boarding rooms, apartments and homes.",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://annexlk.lk/pages/search.html?keyword={search_term_string}",
+        "query-input": "required name=search_term_string"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "AnnexLK",
+        "url": "https://annexlk.lk/",
+        "logo": "https://annexlk.lk/assets/images/branding/siteicon.svg"
+      }
+    }
+  </script>
   <link rel="icon" type="image/svg+xml" href="/assets/images/branding/favicon.svg">
   <link rel="preload" href="/assets/images/branding/banner.svg?v=20260803" as="image" type="image/svg+xml" fetchpriority="high">
   <link rel="preload" href="/assets/images/branding/siteicon.svg?v=20260803-3" as="image" type="image/svg+xml">
@@ -593,7 +626,7 @@
 
         const card = document.createElement('a');
         card.className = 'promo-card';
-        card.href = `/pages/listing.html?slug=${p.slug}`;
+        card.href = `/property/${encodeURIComponent(p.slug)}`;
         card.innerHTML = `
           ${imgHTML}
           <span class="promo-sponsored-tag">Sponsored</span>

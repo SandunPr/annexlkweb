@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Saved Favourites — AnnexLK</title>
+  <meta name="description" content="Review rental properties saved to your AnnexLK favourites.">
+  <meta name="robots" content="noindex,nofollow">
   
   <link rel="icon" type="image/svg+xml" href="/assets/images/branding/favicon.svg">
   <link rel="stylesheet" href="/assets/css/variables.css">
@@ -121,7 +123,7 @@
                 
                 <div class="card-content">
                   <div class="card-price">${parseFloat(p.rent).toLocaleString()} LKR<span> / month</span></div>
-                  <a href="/pages/listing.html?slug=${p.slug}" class="card-title">${p.title}</a>
+                  <a href="/property/${encodeURIComponent(p.slug)}" class="card-title">${p.title}</a>
                   
                   <div class="card-location">
                     <span>📍</span> ${p.city_name}

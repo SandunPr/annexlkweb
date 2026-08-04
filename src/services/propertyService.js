@@ -289,6 +289,7 @@ class PropertyService {
       universityId: filters.universityId ? parseInt(filters.universityId, 10) : null,
       universityDistance: filters.universityDistance ? parseFloat(filters.universityDistance) : null,
       propertyType: filters.propertyType || null,
+      preferredGender: filters.preferredGender || null,
       minRent: filters.minRent ? parseFloat(filters.minRent) : null,
       maxRent: filters.maxRent ? parseFloat(filters.maxRent) : null,
       furnishedStatus: filters.furnishedStatus || null,

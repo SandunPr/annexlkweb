@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Panel — AnnexLK</title>
+  <meta name="description" content="AnnexLK administration dashboard.">
+  <meta name="robots" content="noindex,nofollow,noarchive">
   
   <link rel="icon" type="image/svg+xml" href="/assets/images/branding/favicon.svg">
   <link rel="stylesheet" href="/assets/css/variables.css">
@@ -735,7 +737,7 @@
                 <td>${r.reporter_email}</td>
                 <td>
                   <strong>${r.property_title}</strong><br>
-                  <a href="/pages/listing.html?slug=${r.property_slug}" target="_blank" class="text-primary" style="font-size:12px;">View Ad &raquo;</a>
+                  <a href="/property/${encodeURIComponent(r.property_slug)}" target="_blank" class="text-primary" style="font-size:12px;">View Ad &raquo;</a>
                 </td>
                 <td><span class="badge badge-warning">${r.category}</span></td>
                 <td>${r.comment || '-'}</td>

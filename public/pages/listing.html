@@ -3,7 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Listing Details — AnnexLK</title>
+  <title>Rental Property Details | AnnexLK Sri Lanka</title>
+  <meta name="description" content="View rental property details, monthly rent, facilities, availability and approximate location on AnnexLK Sri Lanka.">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <link rel="canonical" href="https://annexlk.lk/pages/listing.html">
+  <meta property="og:title" content="Rental Property Details | AnnexLK">
+  <meta property="og:description" content="Explore rent, facilities, availability and location details for this Sri Lankan rental property.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://annexlk.lk/pages/listing.html">
+  <meta property="og:site_name" content="AnnexLK">
+  <meta property="og:image" content="https://annexlk.lk/assets/images/branding/banner.svg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Rental Property Details | AnnexLK">
+  <meta name="twitter:description" content="View rent, facilities, availability and location details on AnnexLK.">
+  <meta name="twitter:image" content="https://annexlk.lk/assets/images/branding/banner.svg">
   
   <link rel="icon" type="image/svg+xml" href="/assets/images/branding/favicon.svg">
   <link rel="stylesheet" href="/assets/css/variables.css">
@@ -227,7 +240,8 @@
       Navigation.init();
       
       const urlParams = new URLSearchParams(window.location.search);
-      const slug = urlParams.get('slug');
+      const pathMatch = window.location.pathname.match(/^\/property\/([^/]+)\/?$/);
+      const slug = urlParams.get('slug') || (pathMatch ? decodeURIComponent(pathMatch[1]) : null);
       
       if (!slug) {
         window.location.href = '/pages/search.html';
@@ -247,6 +261,7 @@
           propertyId = p.id;
           
           document.title = `${p.title} — AnnexLK`;
+          updateListingSeo(p, slug);
 
           // Construct Images Gallery slides
           const images = p.images && p.images.length > 0 ? p.images : [
@@ -293,6 +308,7 @@
                 <div class="info-card">
                   <div class="flex align-center mb-10">
                     <span class="badge badge-primary">${p.property_type.replace('_', ' ')}</span>
+                    <span class="badge badge-secondary">${p.preferred_gender === 'MALE' ? 'Male tenants' : p.preferred_gender === 'FEMALE' ? 'Female tenants' : 'Male or Female'}</span>
                     ${verifiedBadge}
                   </div>
                   <h1 class="info-title">${p.title}</h1>
@@ -420,6 +436,24 @@
           </div>
         `;
       }
+    }
+
+    function updateListingSeo(property, slug) {
+      const description = (property.description || `${property.property_type.replace(/_/g, ' ')} for rent in ${property.city_name || 'Sri Lanka'} on AnnexLK.`)
+        .replace(/\s+/g, ' ').trim().slice(0, 160);
+      const canonicalUrl = `https://annexlk.lk/property/${encodeURIComponent(slug)}`;
+      const imagePath = property.images?.[0]?.full_path || property.images?.[0]?.medium_path || property.main_thumbnail;
+      const imageUrl = imagePath ? new URL(imagePath, window.location.origin).href : 'https://annexlk.lk/assets/images/branding/banner.svg';
+
+      document.querySelector('meta[name="description"]').content = description;
+      document.querySelector('link[rel="canonical"]').href = canonicalUrl;
+      document.querySelector('meta[property="og:title"]').content = property.title;
+      document.querySelector('meta[property="og:description"]').content = description;
+      document.querySelector('meta[property="og:url"]').content = canonicalUrl;
+      document.querySelector('meta[property="og:image"]').content = imageUrl;
+      document.querySelector('meta[name="twitter:title"]').content = property.title;
+      document.querySelector('meta[name="twitter:description"]').content = description;
+      document.querySelector('meta[name="twitter:image"]').content = imageUrl;
     }
 
     // ==========================================

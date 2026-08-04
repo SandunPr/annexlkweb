@@ -15,6 +15,7 @@ const createPropertySchema = Joi.object({
   minDurationMonths: Joi.number().integer().min(0).default(1),
   furnishedStatus: Joi.string().valid('UNFURNISHED', 'SEMI_FURNISHED', 'FULLY_FURNISHED').default('UNFURNISHED'),
   occupancyType: Joi.string().valid('INDIVIDUAL', 'SHARED', 'FAMILY').default('INDIVIDUAL'),
+  preferredGender: Joi.string().valid('ANY', 'MALE', 'FEMALE').default('ANY'),
   maxOccupants: Joi.number().integer().positive().default(1),
   currentOccupants: Joi.number().integer().min(0).default(0),
 
@@ -41,6 +42,7 @@ const updatePropertySchema = Joi.object({
   minDurationMonths: Joi.number().integer().min(0).optional(),
   furnishedStatus: Joi.string().valid('UNFURNISHED', 'SEMI_FURNISHED', 'FULLY_FURNISHED').optional(),
   occupancyType: Joi.string().valid('INDIVIDUAL', 'SHARED', 'FAMILY').optional(),
+  preferredGender: Joi.string().valid('ANY', 'MALE', 'FEMALE').optional(),
   maxOccupants: Joi.number().integer().positive().optional(),
   currentOccupants: Joi.number().integer().min(0).optional(),
   status: Joi.string().valid('ACTIVE', 'PAUSED', 'RESERVED', 'OCCUPIED').optional(),

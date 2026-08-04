@@ -15,6 +15,7 @@ const searchRoutes = require('./routes/searchRoutes');
 const favouritesRoutes = require('./routes/favouritesRoutes');
 const renterController = require('./controllers/renterController');
 const authenticate = require('./middleware/authenticate');
+const seoController = require('./controllers/seoController');
 
 const app = express();
 
@@ -61,6 +62,9 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 // 6. API Routes
+// Database-backed sitemap for public pages and active property listings.
+app.get('/sitemap.xml', seoController.sitemap);
+
 // Health Check endpoint
 app.get('/api/v1/health', async (req, res, next) => {
   try {

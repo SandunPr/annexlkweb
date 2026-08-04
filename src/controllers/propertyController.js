@@ -34,6 +34,7 @@ class PropertyController {
         minDurationMonths: req.body.minDurationMonths,
         furnishedStatus: req.body.furnishedStatus,
         occupancyType: req.body.occupancyType,
+        preferredGender: req.body.preferredGender,
         maxOccupants: req.body.maxOccupants,
         currentOccupants: req.body.currentOccupants,
       };
@@ -96,7 +97,7 @@ class PropertyController {
       const updatablePropKeys = [
         'title', 'description', 'propertyType', 'rent', 'deposit', 'advanceMonths',
         'billsIncluded', 'availableDate', 'minDurationMonths', 'furnishedStatus',
-        'occupancyType', 'maxOccupants', 'currentOccupants', 'status'
+        'occupancyType', 'preferredGender', 'maxOccupants', 'currentOccupants', 'status'
       ];
       for (const key of updatablePropKeys) {
         if (req.body[key] !== undefined) {

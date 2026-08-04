@@ -3,7 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Browse Listings — AnnexLK</title>
+  <title>Rental Properties in Sri Lanka | Browse AnnexLK Listings</title>
+  <meta name="description" content="Search annexes, boarding rooms, shared rooms, houses and apartments for rent in Sri Lanka. Refine results by city, university, price and tenant preference.">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <link rel="canonical" href="https://annexlk.lk/pages/search.html">
+  <meta property="og:title" content="Browse Rental Properties in Sri Lanka | AnnexLK">
+  <meta property="og:description" content="Find Sri Lankan rental properties by city, university, monthly rent and tenant preference.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://annexlk.lk/pages/search.html">
+  <meta property="og:site_name" content="AnnexLK">
+  <meta property="og:image" content="https://annexlk.lk/assets/images/branding/banner.svg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Browse Rental Properties in Sri Lanka | AnnexLK">
+  <meta name="twitter:description" content="Search annexes, boarding rooms, houses and apartments across Sri Lanka.">
+  <meta name="twitter:image" content="https://annexlk.lk/assets/images/branding/banner.svg">
   
   <link rel="icon" type="image/svg+xml" href="/assets/images/branding/favicon.svg">
   <link rel="stylesheet" href="/assets/css/variables.css">
@@ -143,7 +156,7 @@
             <!-- City search -->
             <div class="form-group">
               <label class="form-label">Select City</label>
-              <select id="filter-city" class="form-control">
+              <select id="filter-city" class="form-control" data-searchable>
                 <option value="">All Cities</option>
                 <option value="1">Colombo 03</option>
                 <option value="2">Colombo 07</option>
@@ -157,7 +170,7 @@
             <!-- University filter -->
             <div class="form-group">
               <label class="form-label">Near University</label>
-              <select id="filter-university" class="form-control">
+              <select id="filter-university" class="form-control" data-searchable>
                 <option value="">Select University</option>
                 <option value="1">University of Moratuwa</option>
                 <option value="2">University of Colombo</option>
@@ -180,13 +193,22 @@
             <!-- Property Type -->
             <div class="form-group">
               <label class="form-label">Property Type</label>
-              <select id="filter-type" class="form-control">
+              <select id="filter-type" class="form-control" data-searchable>
                 <option value="">Any Property Type</option>
                 <option value="boarding_room">Boarding Room</option>
                 <option value="shared_room">Shared Room</option>
                 <option value="annex">Annex</option>
                 <option value="house">House</option>
                 <option value="apartment">Apartment</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Preferred Tenant</label>
+              <select id="filter-gender" class="form-control">
+                <option value="">Male or Female</option>
+                <option value="MALE">Male</option>
+                <option value="FEMALE">Female</option>
               </select>
             </div>
 
@@ -288,6 +310,7 @@
     import UI from '/assets/js/components/ui.js';
     import Session from '/assets/js/state/session.js';
     import CONFIG from '/assets/js/config.js';
+    import initSearchableSelects from '/assets/js/components/searchableSelect.js';
 
     let currentPage = 1;
     let listingsData = [];
@@ -299,8 +322,10 @@
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.get('cityId')) document.getElementById('filter-city').value = urlParams.get('cityId');
       if (urlParams.get('propertyType')) document.getElementById('filter-type').value = urlParams.get('propertyType');
+      if (urlParams.get('preferredGender')) document.getElementById('filter-gender').value = urlParams.get('preferredGender');
       if (urlParams.get('maxRent')) document.getElementById('filter-max-rent').value = urlParams.get('maxRent');
       if (urlParams.get('universityId')) document.getElementById('filter-university').value = urlParams.get('universityId');
+      initSearchableSelects();
 
       await fetchListings();
 
@@ -356,6 +381,7 @@
       const keyword = document.getElementById('filter-keyword').value.trim();
       const city = document.getElementById('filter-city').value;
       const type = document.getElementById('filter-type').value;
+      const preferredGender = document.getElementById('filter-gender').value;
       const minRent = document.getElementById('filter-min-rent').value;
       const maxRent = document.getElementById('filter-max-rent').value;
       const university = document.getElementById('filter-university').value;
@@ -366,6 +392,7 @@
       if (keyword) params.append('keyword', keyword);
       if (city) params.append('cityId', city);
       if (type) params.append('propertyType', type);
+      if (preferredGender) params.append('preferredGender', preferredGender);
       if (minRent) params.append('minRent', minRent);
       if (maxRent) params.append('maxRent', maxRent);
       if (university) {
@@ -438,13 +465,14 @@
 
               <div class="card-badge-container">
                 <span class="badge badge-secondary">${p.property_type.replace('_', ' ')}</span>
+                <span class="badge badge-primary">${p.preferred_gender === 'MALE' ? 'Male' : p.preferred_gender === 'FEMALE' ? 'Female' : 'Male or Female'}</span>
                 ${kycBadge}
               </div>
             </div>
             
             <div class="card-content">
               <div class="card-price">${parseFloat(p.rent).toLocaleString()} LKR<span> / month</span></div>
-              <a href="/pages/listing.html?slug=${p.slug}" class="card-title">${p.title}</a>
+              <a href="/property/${encodeURIComponent(p.slug)}" class="card-title">${p.title}</a>
               
               <div class="card-location">
                 <span>📍</span> ${p.address_text || p.city_name}
@@ -520,7 +548,7 @@
         [...items, ...items].forEach(p => {
           const a = document.createElement('a');
           a.className = 'sponsored-chip';
-          a.href = `/pages/listing.html?slug=${p.slug}`;
+          a.href = `/property/${encodeURIComponent(p.slug)}`;
           const imgSrc = p.main_thumbnail ? `${p.main_thumbnail}` : '';
           const imgHTML = imgSrc
             ? `<img class="sponsored-chip-thumb" src="${imgSrc}" alt="" loading="lazy">`
