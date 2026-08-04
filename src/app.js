@@ -13,6 +13,7 @@ const adminRoutes = require('./routes/adminRoutes');
 const propertyRoutes = require('./routes/propertyRoutes');
 const searchRoutes = require('./routes/searchRoutes');
 const favouritesRoutes = require('./routes/favouritesRoutes');
+const locationRoutes = require('./routes/locationRoutes');
 const renterController = require('./controllers/renterController');
 const authenticate = require('./middleware/authenticate');
 const seoController = require('./controllers/seoController');
@@ -91,6 +92,7 @@ app.use('/api/v1/admin', adminRoutes);
 app.use('/api/v1/listings', propertyRoutes);
 app.use('/api/v1/search', searchRoutes);
 app.use('/api/v1/favourites', favouritesRoutes);
+app.use('/api/v1/locations', locationRoutes);
 app.use('/api/v1/my-reports', authenticate, renterController.getMyReports);
 
 // 7. Route fallback (404 Not Found)

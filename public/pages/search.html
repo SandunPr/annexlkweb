@@ -326,6 +326,7 @@
 
     document.addEventListener('DOMContentLoaded', async () => {
       Navigation.init();
+      await loadCityOptions();
       
       // Parse URL Query Params on start
       const urlParams = new URLSearchParams(window.location.search);
@@ -379,6 +380,24 @@
         fetchListings();
       });
     });
+
+    async function loadCityOptions() {
+      const select = document.getElementById('filter-city');
+      try {
+        const response = await client.get('locations/cities');
+        if (!response.success || !Array.isArray(response.data)) return;
+
+        select.innerHTML = '';
+        const allCities = new Option('All Cities', '');
+        select.appendChild(allCities);
+        response.data.forEach((city) => {
+          select.appendChild(new Option(`${city.name} (${city.district_name})`, String(city.id)));
+        });
+      } catch (error) {
+        // Keep the built-in options available if the reference-data request fails.
+        console.warn('Could not load the latest city list:', error.message);
+      }
+    }
 
     function requestUserLocation() {
       const button = document.getElementById('use-location-btn');
