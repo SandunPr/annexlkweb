@@ -91,13 +91,18 @@
         
         <!-- Main Content Area -->
         <section class="dashboard-content">
-          <!-- KYC Warning banner -->
-          <div id="kyc-warning-banner" class="switch-container hidden" style="background-color: var(--warning-light); border-color: var(--warning); margin-bottom: 30px;">
+          <!-- Mandatory email verification banner -->
+          <div id="email-warning-banner" class="switch-container hidden" style="background-color: var(--warning-light); border-color: var(--warning); margin-bottom: 20px;">
             <div>
-              <strong class="text-secondary">KYC Verification Required</strong>
-              <p class="text-muted" style="font-size: 13px;">You must complete identity document KYC verification before you can publish property listings.</p>
+              <strong class="text-secondary">Email Verification Required</strong>
+              <p class="text-muted" style="font-size: 13px;">Verify your email before publishing listings. Google-authenticated accounts are already eligible.</p>
             </div>
-            <a href="/pages/kyc.html" class="btn btn-secondary">Submit KYC</a>
+            <a href="/pages/verify-email.html" class="btn btn-secondary">Verify Email</a>
+          </div>
+          <!-- KYC remains available as an optional trust feature. -->
+          <div id="kyc-optional-banner" class="switch-container hidden" style="margin-bottom: 30px;">
+            <div><strong>Optional identity verification</strong><p class="text-muted" style="font-size:13px;">KYC is not required to list. You can complete it to strengthen your trust profile.</p></div>
+            <a href="/pages/kyc.html" class="btn btn-outline">Complete KYC</a>
           </div>
 
           <h2 class="mb-20">My Listings Performance</h2>
@@ -172,11 +177,17 @@
 
       document.getElementById('sidebar-name').innerText = user.full_name || 'Owner Profile';
 
-      // Load KYC status to verify Banner
+      // Email/Google identity controls listing eligibility; KYC is optional.
       try {
+        const profileRes = await client.get('profile');
+        if (profileRes.success && !profileRes.data.email_verified && !profileRes.data.google_authenticated) {
+          const verifyLink = document.querySelector('#email-warning-banner a');
+          verifyLink.href = `/pages/verify-email.html?email=${encodeURIComponent(profileRes.data.email)}`;
+          document.getElementById('email-warning-banner').classList.remove('hidden');
+        }
         const kycRes = await client.get('kyc/status');
         if (kycRes.success && kycRes.data.status !== 'APPROVED') {
-          document.getElementById('kyc-warning-banner').classList.remove('hidden');
+          document.getElementById('kyc-optional-banner').classList.remove('hidden');
         }
       } catch (err) {}
 

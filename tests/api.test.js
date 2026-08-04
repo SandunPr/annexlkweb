@@ -39,9 +39,11 @@ jest.mock('../src/config/db', () => {
           id: 20,
           email: 'owner@annexlk.com',
           password_hash: hash,
-          kyc_status: 'IDENTITY_VERIFIED', // Authorized by default
+          kyc_status: 'REGISTERED', // KYC is optional for listing eligibility
           is_suspended: 0,
           role: 'PROPERTY_OWNER',
+          email_verified: 1,
+          google_authenticated: 0,
         }];
       }
       if (sql.includes('SELECT owner_id FROM properties')) {
@@ -136,6 +138,43 @@ describe('AnnexLK REST API Test Suite', () => {
     });
   });
 
+  describe('Email verification', () => {
+    it('should verify a valid, unexpired single-use token', async () => {
+      db.query.mockImplementationOnce(async () => [{
+        id: 44,
+        expires_at: new Date(Date.now() + 60 * 60 * 1000),
+        verified_at: null,
+      }]);
+
+      const res = await request(app)
+        .post('/api/v1/auth/verify-email')
+        .send({ token: 'a'.repeat(80) });
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.message).toContain('verified successfully');
+      expect(db.query).toHaveBeenCalledWith(
+        'UPDATE email_verifications SET verified_at = NOW() WHERE id = ?',
+        [44]
+      );
+    });
+
+    it('should reject an expired verification token', async () => {
+      db.query.mockImplementationOnce(async () => [{
+        id: 45,
+        expires_at: new Date(Date.now() - 1000),
+        verified_at: null,
+      }]);
+
+      const res = await request(app)
+        .post('/api/v1/auth/verify-email')
+        .send({ token: 'b'.repeat(80) });
+
+      expect(res.status).toBe(400);
+      expect(res.body.message).toContain('expired');
+    });
+  });
+
   // 3. KYC Submission Flow
   describe('POST /api/v1/kyc', () => {
     it('should block KYC upload for guests', async () => {
@@ -158,6 +197,40 @@ describe('AnnexLK REST API Test Suite', () => {
 
   // 4. Image Upload limits (Exactly 3 images)
   describe('POST /api/v1/listings - Image uploads count check', () => {
+    it('should reject an owner whose email is not verified and has no Google identity', async () => {
+      db.query.mockImplementationOnce(async () => [{
+        id: 20,
+        email: 'unverified@annexlk.com',
+        kyc_status: 'IDENTITY_VERIFIED',
+        is_suspended: 0,
+        role: 'PROPERTY_OWNER',
+        email_verified: 0,
+        google_authenticated: 0,
+      }]);
+
+      const res = await request(app)
+        .post('/api/v1/listings')
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .send({
+          description: 'A complete listing description for verification testing.',
+          propertyType: 'annex',
+          availableDate: '2026-09-01',
+          maxOccupants: 2,
+          currentOccupants: 0,
+          rent: 25000,
+          deposit: 25000,
+          advanceMonths: 1,
+          billsIncluded: false,
+          cityId: 1,
+          addressText: 'A valid property address in Colombo, Sri Lanka',
+          exactLatitude: 6.9271,
+          exactLongitude: 79.8612,
+        });
+
+      expect(res.status).toBe(403);
+      expect(res.body.message).toContain('Verify your email');
+    });
+
     it('should reject listing creation if less than 3 images are provided', async () => {
       const res = await request(app)
         .post('/api/v1/listings')
@@ -182,6 +255,34 @@ describe('AnnexLK REST API Test Suite', () => {
 
       expect(res.status).toBe(400);
       expect(res.body.message).toContain('You must upload exactly three listing photos');
+    });
+
+    it('should allow a Google-authenticated owner through the identity gate without KYC', async () => {
+      db.query.mockImplementationOnce(async () => [{
+        id: 20,
+        email: 'google-owner@example.com',
+        kyc_status: 'REGISTERED',
+        is_suspended: 0,
+        role: 'PROPERTY_OWNER',
+        email_verified: 0,
+        google_authenticated: 1,
+      }]);
+
+      const res = await request(app)
+        .post('/api/v1/listings')
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .send({
+          description: 'A complete listing description for Google identity testing.',
+          propertyType: 'annex', availableDate: '2026-09-01', maxOccupants: 2,
+          currentOccupants: 0, rent: 25000, deposit: 25000, advanceMonths: 1,
+          billsIncluded: false, cityId: 1,
+          addressText: 'A valid property address in Colombo, Sri Lanka',
+          exactLatitude: 6.9271, exactLongitude: 79.8612,
+        });
+
+      // Missing photos is the next validation, proving identity eligibility passed.
+      expect(res.status).toBe(400);
+      expect(res.body.message).toContain('exactly three listing photos');
     });
   });
 

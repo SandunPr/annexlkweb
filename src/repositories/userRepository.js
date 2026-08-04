@@ -8,7 +8,9 @@ class UserRepository {
     const query = `
       SELECT u.id, u.email, u.password_hash, u.kyc_status, u.is_suspended,
              p.full_name, p.phone_number, p.address, p.date_of_birth, p.avatar_url,
-             r.name AS role
+             r.name AS role,
+             EXISTS(SELECT 1 FROM email_verifications ev WHERE ev.user_id = u.id AND ev.verified_at IS NOT NULL) AS email_verified,
+             EXISTS(SELECT 1 FROM auth_identities ai WHERE ai.user_id = u.id AND ai.provider = 'google') AS google_authenticated
       FROM users u
       LEFT JOIN user_profiles p ON u.id = p.user_id
       LEFT JOIN user_roles ur ON u.id = ur.user_id
@@ -26,7 +28,9 @@ class UserRepository {
     const query = `
       SELECT u.id, u.email, u.kyc_status, u.is_suspended,
              p.full_name, p.phone_number, p.address, p.date_of_birth, p.avatar_url,
-             r.name AS role
+             r.name AS role,
+             EXISTS(SELECT 1 FROM email_verifications ev WHERE ev.user_id = u.id AND ev.verified_at IS NOT NULL) AS email_verified,
+             EXISTS(SELECT 1 FROM auth_identities ai WHERE ai.user_id = u.id AND ai.provider = 'google') AS google_authenticated
       FROM users u
       LEFT JOIN user_profiles p ON u.id = p.user_id
       LEFT JOIN user_roles ur ON u.id = ur.user_id

@@ -24,6 +24,8 @@ const Navigation = {
     let navLinksHtml = `
       <a href="/index.html" class="nav-link">Home</a>
       <a href="/pages/search.html" class="nav-link">Search</a>
+      <a href="/pages/about.html" class="nav-link">About Us</a>
+      <a href="/pages/contact.html" class="nav-link">Contact Us</a>
     `;
 
     let actionsHtml = '';

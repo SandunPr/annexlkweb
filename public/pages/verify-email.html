@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verify Your Email — AnnexLK</title>
+  <meta name="robots" content="noindex,follow">
+  <link rel="icon" href="/favicon.png">
+  <link rel="stylesheet" href="/assets/css/variables.css"><link rel="stylesheet" href="/assets/css/base.css"><link rel="stylesheet" href="/assets/css/layout.css"><link rel="stylesheet" href="/assets/css/components.css"><link rel="stylesheet" href="/assets/css/forms.css"><link rel="stylesheet" href="/assets/css/responsive.css">
+  <style>.verify-card{max-width:520px;margin:55px auto;background:var(--surface);border:1px solid var(--surface-border);border-radius:var(--radius-lg);padding:40px;box-shadow:var(--shadow-lg);text-align:center}.verify-icon{font-size:52px;margin-bottom:18px}.verify-card p{line-height:1.7}.resend-form{margin-top:28px;padding-top:24px;border-top:1px solid var(--surface-border);text-align:left}</style>
+</head>
+<body><header id="app-header"></header><main class="main-layout"><div class="container"><section class="verify-card" aria-live="polite">
+  <div class="verify-icon" id="verify-icon">✉️</div><h1 id="verify-title">Check your email</h1>
+  <p class="text-muted mt-10" id="verify-message">Open the verification link we sent you. You must verify an email/password account before publishing a property listing.</p>
+  <a href="/pages/login.html" id="login-link" class="btn btn-primary mt-20 hidden">Continue to login</a>
+  <form id="resend-form" class="resend-form"><label for="resend-email" class="form-label">Didn’t receive the email?</label><input type="email" id="resend-email" class="form-control" placeholder="name@domain.com" required><button type="submit" id="resend-btn" class="btn btn-outline mt-10" style="width:100%">Send a new verification link</button></form>
+</section></div></main><footer id="app-footer"></footer>
+<script type="module">
+import Navigation from '/assets/js/utils/navigation.js'; import client from '/assets/js/api/client.js'; import UI from '/assets/js/components/ui.js';
+Navigation.init();
+const params=new URLSearchParams(location.search); const token=params.get('token'); const email=params.get('email');
+const title=document.getElementById('verify-title'); const message=document.getElementById('verify-message'); const icon=document.getElementById('verify-icon'); const login=document.getElementById('login-link');
+if(email) document.getElementById('resend-email').value=email;
+if(token){ title.textContent='Verifying your email…'; message.textContent='Please wait while AnnexLK checks your verification link.'; document.getElementById('resend-form').classList.add('hidden');
+  try{const res=await client.post('auth/verify-email',{token}); icon.textContent='✅'; title.textContent='Email verified'; message.textContent=res.message+' You can now create property listings without completing KYC.'; login.classList.remove('hidden');}
+  catch(err){icon.textContent='⚠️'; title.textContent='Verification unsuccessful'; message.textContent=err.message||'This verification link could not be used.'; document.getElementById('resend-form').classList.remove('hidden');}
+}
+document.getElementById('resend-form').addEventListener('submit',async(e)=>{e.preventDefault();const button=document.getElementById('resend-btn');button.disabled=true;button.textContent='Sending…';try{const res=await client.post('auth/resend-verification',{email:document.getElementById('resend-email').value.trim()});UI.showToast(res.message,'success');}catch(err){UI.showToast(err.message||'Could not request another email.','error');}finally{button.disabled=false;button.textContent='Send a new verification link';}});
+</script></body></html>

@@ -5,6 +5,7 @@ const { OAuth2Client } = require('google-auth-library');
 const { ValidationError, UnauthorizedError, ConflictError, ForbiddenError } = require('../utils/errors');
 const logger = require('../utils/logger');
 const db = require('../config/db');
+const emailService = require('./emailService');
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -34,12 +35,20 @@ class AuthService {
       phoneNumber,
     });
 
+    const verificationEmailSent = await this.issueEmailVerification({
+      userId,
+      email,
+      fullName,
+    });
+
     logger.info(`User registered successfully. ID: ${userId}, Email: ${email}, Role: ${roleName}`);
 
     return {
       userId,
       email,
       role: roleName,
+      verificationRequired: true,
+      verificationEmailSent,
     };
   }
 
@@ -99,7 +108,7 @@ class AuthService {
   /**
    * Login or register via Google Sign-In.
    */
-  async loginWithGoogle(idToken) {
+  async loginWithGoogle(idToken, requestedRole = 'RENTER') {
     let payload;
     try {
       const ticket = await googleClient.verifyIdToken({
@@ -112,9 +121,9 @@ class AuthService {
       throw new UnauthorizedError('Invalid Google authentication token.');
     }
 
-    const { sub: googleUserId, email, name, picture } = payload;
-    if (!email) {
-      throw new ValidationError('Google account must share email address.');
+    const { sub: googleUserId, email, email_verified: emailVerified, name, picture } = payload;
+    if (!email || emailVerified !== true) {
+      throw new ValidationError('Google account must provide a verified email address.');
     }
 
     // Look for user by email
@@ -132,8 +141,9 @@ class AuthService {
         );
         userId = userResult.insertId;
 
-        // Default role: RENTER
-        const [roleRows] = await conn.execute('SELECT id FROM roles WHERE name = "RENTER"');
+        // Registration may explicitly choose renter or property owner; login defaults to renter.
+        const roleName = ['PROPERTY_OWNER', 'RENTER'].includes(requestedRole) ? requestedRole : 'RENTER';
+        const [roleRows] = await conn.execute('SELECT id FROM roles WHERE name = ?', [roleName]);
         const roleId = roleRows[0].id;
         await conn.execute('INSERT INTO user_roles (user_id, role_id) VALUES (?, ?)', [userId, roleId]);
 
@@ -172,6 +182,7 @@ class AuthService {
         );
         logger.info(`Linked Google identity to existing email user. ID: ${userId}`);
       }
+      user.google_authenticated = 1;
 
       // Keep Google's picture current unless the user chose a locally uploaded avatar.
       const hasManualAvatar = user.avatar_url && user.avatar_url.startsWith('/media/avatars/');
@@ -205,6 +216,62 @@ class AuthService {
       accessToken,
       refreshToken: rawRefreshToken,
     };
+  }
+
+  async issueEmailVerification({ userId, email, fullName }) {
+    const rawToken = authUtils.generateRandomToken();
+    const tokenHash = authUtils.hashToken(rawToken);
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+    await db.query(
+      'DELETE FROM email_verifications WHERE user_id = ? AND verified_at IS NULL',
+      [userId]
+    );
+    await db.query(
+      'INSERT INTO email_verifications (user_id, token, expires_at) VALUES (?, ?, ?)',
+      [userId, tokenHash, expiresAt]
+    );
+
+    try {
+      await emailService.sendVerificationEmail({ email, fullName, token: rawToken });
+      return true;
+    } catch (error) {
+      logger.error(`Could not send verification email to ${email}: ${error.message}`);
+      return false;
+    }
+  }
+
+  async verifyEmail(rawToken) {
+    const tokenHash = authUtils.hashToken(rawToken);
+    const rows = await db.query(
+      `SELECT ev.id, ev.expires_at, ev.verified_at
+       FROM email_verifications ev
+       WHERE ev.token = ? LIMIT 1`,
+      [tokenHash]
+    );
+
+    if (rows.length === 0) {
+      throw new ValidationError('This verification link is invalid or has already been replaced.');
+    }
+    const verification = rows[0];
+    if (verification.verified_at) return { alreadyVerified: true };
+    if (new Date(verification.expires_at) < new Date()) {
+      throw new ValidationError('This verification link has expired. Please request a new one.');
+    }
+
+    await db.query('UPDATE email_verifications SET verified_at = NOW() WHERE id = ?', [verification.id]);
+    return { alreadyVerified: false };
+  }
+
+  async resendEmailVerification(email) {
+    const user = await userRepository.findByEmail(email);
+    // Return the same response for unknown, Google, and verified accounts to prevent enumeration.
+    if (!user || user.email_verified || user.google_authenticated) return;
+    await this.issueEmailVerification({
+      userId: user.id,
+      email: user.email,
+      fullName: user.full_name,
+    });
   }
 
   /**
