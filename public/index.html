@@ -1,41 +1,67 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AnnexLK — Sri Lanka's Trusted Property Discovery Platform</title>
-  <link rel="icon" type="image/png" href="/favicon.png">
-  
+  <link rel="icon" type="image/svg+xml" href="/assets/images/branding/favicon.svg">
+  <link rel="preload" href="/assets/images/branding/banner.svg?v=20260803" as="image" type="image/svg+xml" fetchpriority="high">
+  <link rel="preload" href="/assets/images/branding/siteicon.svg?v=20260803-3" as="image" type="image/svg+xml">
+  <link rel="preload" href="/assets/images/icons/boarding_rooms.svg" as="image" type="image/svg+xml">
+  <link rel="preload" href="/assets/images/icons/annexes.svg" as="image" type="image/svg+xml">
+  <link rel="preload" href="/assets/images/icons/apartments.svg" as="image" type="image/svg+xml">
+  <link rel="preload" href="/assets/images/icons/houses.svg" as="image" type="image/svg+xml">
+
   <link rel="stylesheet" href="/assets/css/variables.css">
   <link rel="stylesheet" href="/assets/css/base.css">
   <link rel="stylesheet" href="/assets/css/layout.css">
   <link rel="stylesheet" href="/assets/css/components.css">
   <link rel="stylesheet" href="/assets/css/forms.css">
   <link rel="stylesheet" href="/assets/css/responsive.css">
-  
+
   <style>
     /* Hero section styles */
     .hero-section {
-      background: var(--grad-hero);
+      background-image: url('/assets/images/branding/banner.svg?v=20260803');
+      background-position: center;
+      background-size: cover;
+      background-repeat: no-repeat;
       padding: 100px 0 120px 0;
       color: white;
       text-align: center;
       position: relative;
     }
-    
+
     .hero-title {
-      font-size: 42px;
       font-weight: 700;
       margin-bottom: 16px;
-      line-height: 1.2;
+      line-height: 1.08;
+      color: #0c4a6e;
     }
-    
+
+    .hero-title-primary,
+    .hero-title-secondary,
+    .hero-subtitle-line {
+      display: block;
+    }
+
+    .hero-title-primary {
+      font-size: 58px;
+    }
+
+    .hero-title-secondary {
+      font-size: 44px;
+      margin-top: 8px;
+    }
+
     .hero-subtitle {
-      font-size: 18px;
-      color: rgba(255, 255, 255, 0.85);
+      font-size: 21px;
+      color: #0c4a6e;
       margin-bottom: 40px;
+      line-height: 1.5;
     }
-    
+
     /* Search Box Container */
     .hero-search-box {
       max-width: 900px;
@@ -49,7 +75,7 @@
       align-items: center;
       color: var(--text-main);
     }
-    
+
     .search-input-group {
       flex: 1;
       display: flex;
@@ -58,19 +84,19 @@
       border-right: 1px solid var(--surface-border);
       padding-right: 16px;
     }
-    
+
     .search-input-group:last-of-type {
       border-right: none;
       padding-right: 0;
     }
-    
+
     /* Category grid card styles */
     .category-section {
       margin-top: -60px;
       position: relative;
       z-index: 10;
     }
-    
+
     .category-card {
       background-color: var(--surface);
       border: 1px solid var(--surface-border);
@@ -81,17 +107,19 @@
       cursor: pointer;
       transition: all var(--transition-md);
     }
-    
+
     .category-card:hover {
       transform: translateY(-5px);
       border-color: var(--primary);
       box-shadow: var(--shadow-lg);
     }
-    
+
     .category-icon {
-      font-size: 32px;
+      width: 104px;
+      height: 104px;
       margin-bottom: 12px;
-      display: block;
+      display: inline-block;
+      object-fit: contain;
     }
 
     /* Trust banner */
@@ -122,12 +150,14 @@
       position: relative;
       overflow: hidden;
     }
+
     .promo-section-label {
       display: flex;
       align-items: center;
       gap: 10px;
       margin-bottom: 24px;
     }
+
     .promo-badge {
       background: linear-gradient(135deg, #f59e0b, #ef4444);
       color: white;
@@ -139,33 +169,54 @@
       text-transform: uppercase;
       animation: pulse-badge 2s infinite;
     }
+
     @keyframes pulse-badge {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(245,158,11,0.4); }
-      50%       { box-shadow: 0 0 0 6px rgba(245,158,11,0); }
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4);
+      }
+
+      50% {
+        box-shadow: 0 0 0 6px rgba(245, 158, 11, 0);
+      }
     }
+
     .promo-track-wrapper {
       overflow: hidden;
       cursor: grab;
       user-select: none;
       position: relative;
     }
+
     .promo-track-wrapper::before,
     .promo-track-wrapper::after {
       content: '';
       position: absolute;
-      top: 0; bottom: 0;
+      top: 0;
+      bottom: 0;
       width: 80px;
       z-index: 2;
       pointer-events: none;
     }
-    .promo-track-wrapper::before { left: 0;  background: linear-gradient(to right, var(--surface-alt, var(--surface)), transparent); }
-    .promo-track-wrapper::after  { right: 0; background: linear-gradient(to left,  var(--surface-alt, var(--surface)), transparent); }
+
+    .promo-track-wrapper::before {
+      left: 0;
+      background: linear-gradient(to right, var(--surface-alt, var(--surface)), transparent);
+    }
+
+    .promo-track-wrapper::after {
+      right: 0;
+      background: linear-gradient(to left, var(--surface-alt, var(--surface)), transparent);
+    }
+
     .promo-track {
       display: flex;
       gap: 20px;
       transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
       will-change: transform;
     }
+
     .promo-card {
       flex: 0 0 300px;
       max-width: calc(100vw - 48px);
@@ -180,10 +231,12 @@
       text-decoration: none;
       color: inherit;
     }
+
     .promo-card:hover {
       transform: translateY(-6px);
       box-shadow: var(--shadow-lg);
     }
+
     .promo-card-img {
       width: 100%;
       height: 175px;
@@ -191,6 +244,7 @@
       background: var(--surface-border);
       display: block;
     }
+
     .promo-card-img-placeholder {
       width: 100%;
       height: 175px;
@@ -200,11 +254,12 @@
       justify-content: center;
       font-size: 40px;
     }
+
     .promo-sponsored-tag {
       position: absolute;
       top: 10px;
       left: 10px;
-      background: rgba(0,0,0,0.65);
+      background: rgba(0, 0, 0, 0.65);
       color: #fbbf24;
       font-size: 10px;
       font-weight: 700;
@@ -214,9 +269,11 @@
       text-transform: uppercase;
       backdrop-filter: blur(4px);
     }
+
     .promo-card-body {
       padding: 14px 16px 16px;
     }
+
     .promo-card-title {
       font-size: 13px;
       font-weight: 600;
@@ -227,29 +284,35 @@
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
+
     .promo-card-meta {
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
+
     .promo-card-rent {
       font-size: 16px;
       font-weight: 700;
       color: var(--primary);
     }
+
     .promo-card-location {
       font-size: 11px;
       color: var(--text-muted);
       margin-top: 4px;
     }
+
     .promo-nav-dots {
       display: flex;
       justify-content: center;
       gap: 8px;
       margin-top: 20px;
     }
+
     .promo-dot {
-      width: 8px; height: 8px;
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
       background: var(--surface-border);
       border: none;
@@ -257,10 +320,12 @@
       padding: 0;
       transition: background 0.2s, transform 0.2s;
     }
+
     .promo-dot.active {
       background: var(--primary);
       transform: scale(1.3);
     }
+
     #promo-placeholder {
       display: flex;
       align-items: center;
@@ -271,6 +336,7 @@
     }
   </style>
 </head>
+
 <body>
 
   <!-- App Header Navbar Injected dynamically -->
@@ -279,14 +345,21 @@
   <!-- Hero Section -->
   <section class="hero-section">
     <div class="container">
-      <h1 class="hero-title">Find Your Perfect Boarding Room, Annex or House</h1>
-      <p class="hero-subtitle">Discover verified student and worker boarding rooms near major universities and cities in Sri Lanka</p>
-      
+      <h1 class="hero-title">
+        <span class="hero-title-primary">Find Your Perfect</span>
+        <span class="hero-title-secondary">Boarding Room, Annex or House</span>
+      </h1>
+      <p class="hero-subtitle">
+        <span class="hero-subtitle-line">Discover verified student and worker boarding rooms</span>
+        <span class="hero-subtitle-line">near major universities and cities in Sri Lanka</span>
+      </p>
+
       <!-- Hero Search Bar Form -->
       <form id="hero-search-form" class="hero-search-box">
         <div class="search-input-group">
           <label class="form-label" style="margin-bottom: 4px;">Location / City</label>
-          <select id="search-city" class="form-control" style="border: none; padding-left: 0; background-position: right center;">
+          <select id="search-city" class="form-control"
+            style="border: none; padding-left: 0; background-position: right center;">
             <option value="">Anywhere in Sri Lanka</option>
             <option value="3">Moratuwa (Near UOM)</option>
             <option value="4">Kelaniya (Near UOK)</option>
@@ -296,10 +369,11 @@
             <option value="6">Peradeniya (Near UOP)</option>
           </select>
         </div>
-        
+
         <div class="search-input-group">
           <label class="form-label" style="margin-bottom: 4px;">Property Type</label>
-          <select id="search-type" class="form-control" style="border: none; padding-left: 0; background-position: right center;">
+          <select id="search-type" class="form-control"
+            style="border: none; padding-left: 0; background-position: right center;">
             <option value="">Any Type</option>
             <option value="boarding_room">Boarding Room</option>
             <option value="shared_room">Shared Room</option>
@@ -311,7 +385,8 @@
 
         <div class="search-input-group">
           <label class="form-label" style="margin-bottom: 4px;">Max Monthly Rent</label>
-          <select id="search-rent" class="form-control" style="border: none; padding-left: 0; background-position: right center;">
+          <select id="search-rent" class="form-control"
+            style="border: none; padding-left: 0; background-position: right center;">
             <option value="">No Limit</option>
             <option value="15000">Below 15,000 LKR</option>
             <option value="30000">Below 30,000 LKR</option>
@@ -330,25 +405,25 @@
     <div class="container">
       <div class="grid-fluid gap-20">
         <div class="category-card" onclick="window.location.href='/pages/search.html?propertyType=boarding_room'">
-          <span class="category-icon">🛏️</span>
+          <img class="category-icon" src="/assets/images/icons/boarding_rooms.svg" alt="" width="104" height="104" loading="eager" decoding="async">
           <h3>Boarding Rooms</h3>
           <p class="text-muted mt-10">Single/Shared student spaces</p>
         </div>
-        
+
         <div class="category-card" onclick="window.location.href='/pages/search.html?propertyType=annex'">
-          <span class="category-icon">🚪</span>
+          <img class="category-icon" src="/assets/images/icons/annexes.svg" alt="" width="104" height="104" loading="eager" decoding="async">
           <h3>Annexes</h3>
           <p class="text-muted mt-10">Private self-contained units</p>
         </div>
-        
+
         <div class="category-card" onclick="window.location.href='/pages/search.html?propertyType=apartment'">
-          <span class="category-icon">🏢</span>
+          <img class="category-icon" src="/assets/images/icons/apartments.svg" alt="" width="104" height="104" loading="eager" decoding="async">
           <h3>Apartments</h3>
           <p class="text-muted mt-10">Modern city living</p>
         </div>
-        
+
         <div class="category-card" onclick="window.location.href='/pages/search.html?propertyType=house'">
-          <span class="category-icon">🏡</span>
+          <img class="category-icon" src="/assets/images/icons/houses.svg" alt="" width="104" height="104" loading="eager" decoding="async">
           <h3>Houses</h3>
           <p class="text-muted mt-10">Comfortable family homes</p>
         </div>
@@ -362,7 +437,8 @@
       <div class="promo-section-label">
         <span class="promo-badge">✦ Sponsored</span>
         <h2 style="font-size:20px; margin:0;">Featured Properties</h2>
-        <span class="text-muted" style="font-size:13px; margin-left:auto;">Promoted listings · <a href="/pages/contact.html" style="color:var(--primary);">Advertise here</a></span>
+        <span class="text-muted" style="font-size:13px; margin-left:auto;">Promoted listings · <a
+            href="/pages/contact.html" style="color:var(--primary);">Advertise here</a></span>
       </div>
       <div class="promo-track-wrapper" id="promo-track-wrapper">
         <div class="promo-track" id="promo-track"></div>
@@ -422,23 +498,31 @@
   <!-- Trust and Safety Guide -->
   <section class="container mt-40">
     <h2 class="text-center mb-20">Safe & Trustworthy Rental Search</h2>
-    <div class="grid grid-3 gap-20 mt-20" style="grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));">
+    <div class="grid grid-3 gap-20 mt-20"
+      style="grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));">
       <div class="trust-card">
         <span style="font-size: 24px; display: block; margin-bottom: 12px;">🛡️</span>
         <h3>Verified Property Owners</h3>
+<<<<<<< HEAD
         <p class="text-muted mt-10">Property owners must verify their email or sign in with Google. Optional KYC checks provide an additional identity trust signal.</p>
+=======
+        <p class="text-muted mt-10">We require legal document KYC checks on owners before listings can be published,
+          ensuring real people run the rentals.</p>
+>>>>>>> b600ebc1a3f4efd003b67faaf6519a6f5f5ecc9d
       </div>
 
       <div class="trust-card">
         <span style="font-size: 24px; display: block; margin-bottom: 12px;">📍</span>
         <h3>Approximate Location Privacy</h3>
-        <p class="text-muted mt-10">We obfuscate listing positions for public views, showing a circular area until contact is confirmed, protecting owner privacy.</p>
+        <p class="text-muted mt-10">We obfuscate listing positions for public views, showing a circular area until
+          contact is confirmed, protecting owner privacy.</p>
       </div>
 
       <div class="trust-card">
         <span style="font-size: 24px; display: block; margin-bottom: 12px;">🚫</span>
         <h3>Zero Deposit Scam Guarantee</h3>
-        <p class="text-muted mt-10">We warn renters never to send advance payments without visiting properties first, and provide one-click reporting tools.</p>
+        <p class="text-muted mt-10">We warn renters never to send advance payments without visiting properties first,
+          and provide one-click reporting tools.</p>
       </div>
     </div>
   </section>
@@ -448,9 +532,16 @@
     <div class="cta-banner">
       <div>
         <h2 style="font-size: 28px; margin-bottom: 8px;">Are you a Property Owner?</h2>
+<<<<<<< HEAD
         <p style="opacity: 0.9; max-width: 600px;">Verify your email or use Google sign-in, publish your boarding rooms or annexes, and optionally complete KYC to strengthen renter trust.</p>
+=======
+        <p style="opacity: 0.9; max-width: 600px;">Get verified under our KYC guidelines, publish your boarding rooms or
+          annexes, and reach thousands of university students and professionals looking for trusted spaces.</p>
+>>>>>>> b600ebc1a3f4efd003b67faaf6519a6f5f5ecc9d
       </div>
-      <a href="/pages/register.html?role=PROPERTY_OWNER" class="btn btn-secondary" style="height: 52px; padding: 0 30px; border-radius: var(--radius-sm); border: 2px solid white; box-shadow: var(--shadow-sm);">List Your Space</a>
+      <a href="/pages/register.html?role=PROPERTY_OWNER" class="btn btn-secondary"
+        style="height: 52px; padding: 0 30px; border-radius: var(--radius-sm); border: 2px solid white; box-shadow: var(--shadow-sm);">List
+        Your Space</a>
     </div>
   </section>
 
@@ -459,7 +550,7 @@
 
   <!-- App scripts module initialization -->
   <script type="module">
-    import Navigation from '/assets/js/utils/navigation.js';
+    import Navigation from '/assets/js/utils/navigation.js?v=20260803-3';
     import client from '/assets/js/api/client.js';
 
     document.addEventListener('DOMContentLoaded', async () => {
@@ -556,11 +647,12 @@
       // Swipe / drag support
       let startX = 0;
       wrapper.addEventListener('pointerdown', e => { startX = e.clientX; wrapper.setPointerCapture(e.pointerId); });
-      wrapper.addEventListener('pointerup',   e => {
+      wrapper.addEventListener('pointerup', e => {
         const delta = startX - e.clientX;
         if (Math.abs(delta) > 40) goTo(currentPage + (delta > 0 ? 1 : -1 + items.length));
       });
     }
   </script>
 </body>
+
 </html>

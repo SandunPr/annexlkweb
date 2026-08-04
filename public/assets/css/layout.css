@@ -31,11 +31,14 @@
   font-size: 24px;
   font-weight: 700;
   color: var(--primary);
-  gap: 8px;
+  gap: 10px;
+  text-decoration: none;
 }
 
-.app-logo span {
-  color: var(--secondary);
+
+.app-logo-image {
+  width: min(150px, 34vw);
+  height: auto;
 }
 
 .app-nav {
@@ -53,7 +56,8 @@
   transition: all var(--transition-fast);
 }
 
-.nav-link:hover, .nav-link.active {
+.nav-link:hover,
+.nav-link.active {
   color: var(--primary);
   background-color: var(--primary-light);
 }

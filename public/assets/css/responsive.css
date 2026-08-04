@@ -239,8 +239,14 @@
   .hero-title {
     font-size: 28px !important;
   }
+  .hero-title-primary {
+    font-size: 42px !important;
+  }
+  .hero-title-secondary {
+    font-size: 32px !important;
+  }
   .hero-subtitle {
-    font-size: 15px !important;
+    font-size: 17px !important;
     margin-bottom: 24px !important;
   }
   .hero-search-box {
@@ -310,6 +316,19 @@
 
   .app-logo {
     font-size: 20px;
+  }
+
+  .app-logo-image {
+    width: min(135px, 42vw);
+    height: auto;
+  }
+
+  .hero-title-primary {
+    font-size: 34px !important;
+  }
+
+  .hero-title-secondary {
+    font-size: 26px !important;
   }
 
   .grid-2,
