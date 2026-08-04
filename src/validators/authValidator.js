@@ -62,6 +62,15 @@ const googleAuthSchema = Joi.object({
     .messages({
       'any.required': 'Google ID Token is required.',
     }),
+  roleName: Joi.string().valid('PROPERTY_OWNER', 'RENTER').optional(),
+});
+
+const verifyEmailSchema = Joi.object({
+  token: Joi.string().min(40).max(200).required(),
+});
+
+const resendVerificationSchema = Joi.object({
+  email: Joi.string().email().required(),
 });
 
 const forgotPasswordSchema = Joi.object({
@@ -81,6 +90,8 @@ module.exports = {
   registerSchema,
   loginSchema,
   googleAuthSchema,
+  verifyEmailSchema,
+  resendVerificationSchema,
   forgotPasswordSchema,
   resetPasswordSchema,
 };

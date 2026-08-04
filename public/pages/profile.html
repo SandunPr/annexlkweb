@@ -85,7 +85,7 @@
               <span style="font-size: 24px;" id="trust-icon">🛡️</span>
               <div>
                 <div style="font-weight: 700; font-size: 16px;" id="trust-level-label">REGISTERED</div>
-                <p class="text-muted" style="font-size: 13px;" id="trust-description">Basic account. You must verify your phone and identity before listing rooms.</p>
+                <p class="text-muted" style="font-size: 13px;" id="trust-description">Verify your email to list. Phone and identity checks are optional trust features.</p>
               </div>
               <span class="badge badge-warning" id="trust-badge" style="margin-left: auto;">REGISTERED</span>
             </div>
@@ -93,8 +93,8 @@
             <!-- KYC Action Banner -->
             <div id="kyc-action-banner" class="switch-container hidden" style="margin-bottom: 30px; background-color: var(--primary-light); border-color: var(--primary);">
               <div>
-                <strong class="text-primary">Verify Your Identity (KYC)</strong>
-                <p class="text-muted" style="font-size: 13px;">Submit your ID card/passport to list properties on AnnexLK.</p>
+                <strong class="text-primary">Optional Identity Verification (KYC)</strong>
+                <p class="text-muted" style="font-size: 13px;">Submit your ID card or passport if you want an additional identity trust signal.</p>
               </div>
               <a href="/pages/kyc.html" class="btn btn-primary">Complete KYC</a>
             </div>
@@ -291,7 +291,7 @@
         if (status === 'REGISTERED') {
           badge.classList.add('badge-danger');
           label.innerText = 'REGISTERED';
-          desc.innerText = 'Basic account. You must verify your phone and identity (KYC) before listing rooms.';
+          desc.innerText = 'Basic account. Email verification is required to list; phone and KYC verification are optional trust steps.';
           icon.innerText = '🛡️';
           
           if (user.role === 'PROPERTY_OWNER') {
@@ -300,7 +300,7 @@
         } else if (status === 'PHONE_VERIFIED') {
           badge.classList.add('badge-warning');
           label.innerText = 'PHONE VERIFIED';
-          desc.innerText = 'Phone verified. Next step: complete identity document verification.';
+          desc.innerText = 'Phone verified. Identity document verification remains optional.';
           icon.innerText = '📱';
           
           if (user.role === 'PROPERTY_OWNER') {

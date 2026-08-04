@@ -24,8 +24,8 @@ const AuthService = {
   /**
    * Log in with Google credentials.
    */
-  async loginWithGoogle(googleIdToken) {
-    const res = await client.post('auth/google', { idToken: googleIdToken });
+  async loginWithGoogle(googleIdToken, roleName) {
+    const res = await client.post('auth/google', { idToken: googleIdToken, ...(roleName ? { roleName } : {}) });
     if (res.success) {
       Session.save(res.data.user, res.data.accessToken);
     }

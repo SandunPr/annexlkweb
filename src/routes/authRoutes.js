@@ -6,6 +6,8 @@ const {
   registerSchema,
   loginSchema,
   googleAuthSchema,
+  verifyEmailSchema,
+  resendVerificationSchema,
 } = require('../validators/authValidator');
 
 const router = express.Router();
@@ -14,6 +16,8 @@ const router = express.Router();
 router.post('/register', validate(registerSchema), authController.register);
 router.post('/login', validate(loginSchema), authController.login);
 router.post('/google', validate(googleAuthSchema), authController.googleLogin);
+router.post('/verify-email', validate(verifyEmailSchema), authController.verifyEmail);
+router.post('/resend-verification', validate(resendVerificationSchema), authController.resendVerification);
 router.post('/refresh', authController.refresh);
 router.post('/logout', authController.logout);
 

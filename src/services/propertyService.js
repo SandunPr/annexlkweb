@@ -62,15 +62,14 @@ class PropertyService {
    * Create a new property listing.
    */
   async createProperty(userId, propertyPayload, locationPayload, facilityIds, files) {
-    // 1. Verify owner KYC trust level
+    // 1. Require a verified email identity. KYC remains an optional trust feature.
     const user = await userRepository.findById(userId);
     if (!user) {
       throw new NotFoundError('User account not found.');
     }
 
-    const verifiedStatuses = ['IDENTITY_VERIFIED', 'PROPERTY_VERIFIED', 'TRUSTED_OWNER'];
-    if (!verifiedStatuses.includes(user.kyc_status)) {
-      throw new ForbiddenError('You must complete KYC identity verification before you can submit property listings.');
+    if (!user.email_verified && !user.google_authenticated) {
+      throw new ForbiddenError('Verify your email address before creating a listing. Google-authenticated accounts are already eligible.');
     }
 
     // 2. Validate exact 3 image files rule

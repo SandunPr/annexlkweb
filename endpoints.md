@@ -5,6 +5,8 @@ All production endpoints run under the base prefix: `https://annexlk.ekafy.com/a
 | Method | Endpoint | Category | Auth Level | Payload / Params | Description |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **POST** | `/auth/register` | Authentication | Public | `{ email, password, roleName, fullName, phoneNumber }` | Registers a new user account (role: `RENTER` or `PROPERTY_OWNER`). |
+| **POST** | `/auth/verify-email` | Authentication | Public | `{ token }` | Verifies a local account using a single-use, 24-hour email token. |
+| **POST** | `/auth/resend-verification` | Authentication | Public | `{ email }` | Sends a replacement email verification link when required. |
 | **POST** | `/auth/login` | Authentication | Public | `{ email, password }` | Authenticates local credentials, issues JWT access token, and sets refresh token cookie. |
 | **POST** | `/auth/google` | Authentication | Public | `{ idToken }` | Validates Google identity tokens and issues login credentials. |
 | **POST** | `/auth/refresh` | Authentication | Public | *Credentials cookie sent automatically* | Rotates tokens silently on expiration. |

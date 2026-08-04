@@ -73,13 +73,13 @@
 
 /* Dark Theme Variables override */
 [data-theme="dark"] {
-  --background: HSL(222, 47%, 10%);
-  --surface: HSL(222, 47%, 14%);
-  --surface-border: HSL(222, 30%, 20%);
+  --background: HSL(222, 32%, 16%);
+  --surface: HSL(222, 30%, 20%);
+  --surface-border: HSL(220, 24%, 29%);
   --text-main: HSL(210, 40%, 98%);
   --text-muted: HSL(215, 20%, 75%);
   --text-light: HSL(215, 15%, 55%);
-  --grad-glass: linear-gradient(135deg, rgba(30, 41, 59, 0.7) 0%, rgba(30, 41, 59, 0.4) 100%);
-  --primary-light: HSL(var(--primary-hue), 60%, 15%);
-  --secondary-light: HSL(var(--secondary-hue), 60%, 15%);
+  --grad-glass: linear-gradient(135deg, rgba(51, 65, 85, 0.72) 0%, rgba(51, 65, 85, 0.45) 100%);
+  --primary-light: HSL(var(--primary-hue), 45%, 22%);
+  --secondary-light: HSL(var(--secondary-hue), 45%, 22%);
 }
