@@ -167,6 +167,13 @@
               </select>
             </div>
 
+            <!-- Browser geolocation search; coordinates remain in memory only. -->
+            <div class="form-group">
+              <label class="form-label">Properties Near Me</label>
+              <button type="button" id="use-location-btn" class="btn btn-outline" style="width:100%;">📍 Use My Current Location</button>
+              <small id="location-status" class="text-muted" style="display:block; margin-top:8px; line-height:1.4;">Your browser will ask for location permission.</small>
+            </div>
+
             <!-- University filter -->
             <div class="form-group">
               <label class="form-label">Near University</label>
@@ -182,7 +189,7 @@
 
             <!-- Proximity Distance -->
             <div class="form-group">
-              <label class="form-label">Max Distance Proximity</label>
+              <label class="form-label">Search Radius</label>
               <select id="filter-distance" class="form-control">
                 <option value="2">Within 2 km</option>
                 <option value="5" selected>Within 5 km</option>
@@ -263,6 +270,7 @@
                 <option value="newest">Newest</option>
                 <option value="lowest_rent">Rent: Low to High</option>
                 <option value="highest_rent">Rent: High to Low</option>
+                <option value="closest">Closest to Me</option>
               </select>
             </div>
           </div>
@@ -314,6 +322,7 @@
 
     let currentPage = 1;
     let listingsData = [];
+    let userLocation = null;
 
     document.addEventListener('DOMContentLoaded', async () => {
       Navigation.init();
@@ -337,9 +346,14 @@
         fetchListings();
       });
 
+      document.getElementById('use-location-btn').addEventListener('click', requestUserLocation);
+
       // Reset filters
       document.getElementById('reset-filters').addEventListener('click', () => {
         filterForm.reset();
+        userLocation = null;
+        document.getElementById('location-status').textContent = 'Your browser will ask for location permission.';
+        document.getElementById('use-location-btn').textContent = '📍 Use My Current Location';
         document.querySelectorAll('.facility-checkbox').forEach(cb => cb.checked = false);
         currentPage = 1;
         fetchListings();
@@ -365,6 +379,57 @@
         fetchListings();
       });
     });
+
+    function requestUserLocation() {
+      const button = document.getElementById('use-location-btn');
+      const status = document.getElementById('location-status');
+
+      if (!navigator.geolocation) {
+        status.textContent = 'Location search is not supported by this browser.';
+        UI.showToast('Your browser does not support location search.', 'warning');
+        return;
+      }
+
+      button.disabled = true;
+      button.textContent = 'Finding your location…';
+      status.textContent = 'Waiting for browser permission…';
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          userLocation = {
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          };
+
+          // Avoid unintentionally combining current location with another location filter.
+          ['filter-city', 'filter-university'].forEach((id) => {
+            const select = document.getElementById(id);
+            select.value = '';
+            select.dispatchEvent(new Event('change', { bubbles: true }));
+          });
+
+          document.getElementById('sort-select').value = 'closest';
+          button.disabled = false;
+          button.textContent = '✓ Using My Location';
+          status.textContent = `Showing properties within ${document.getElementById('filter-distance').value} km. Your coordinates are not saved.`;
+          currentPage = 1;
+          fetchListings();
+        },
+        (error) => {
+          const messages = {
+            1: 'Location permission was denied. Allow location access in your browser settings to use this feature.',
+            2: 'Your location is currently unavailable. Please try again.',
+            3: 'Finding your location took too long. Please try again.',
+          };
+          userLocation = null;
+          button.disabled = false;
+          button.textContent = '📍 Use My Current Location';
+          status.textContent = messages[error.code] || 'Unable to find your location.';
+          UI.showToast(status.textContent, 'warning');
+        },
+        { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 }
+      );
+    }
 
     /**
      * Query API search endpoints dynamically.
@@ -398,6 +463,11 @@
       if (university) {
         params.append('universityId', university);
         params.append('universityDistance', distance);
+      }
+      if (userLocation) {
+        params.append('latitude', userLocation.latitude.toFixed(6));
+        params.append('longitude', userLocation.longitude.toFixed(6));
+        params.append('distance', distance);
       }
       if (verified) params.append('verifiedOwner', 'true');
       params.append('sortBy', sortBy);
@@ -476,6 +546,7 @@
               
               <div class="card-location">
                 <span>📍</span> ${p.address_text || p.city_name}
+                ${p.distance !== undefined ? `<small class="text-muted"> · about ${Number(p.distance).toFixed(1)} km away</small>` : ''}
               </div>
               
               <div class="card-meta">
