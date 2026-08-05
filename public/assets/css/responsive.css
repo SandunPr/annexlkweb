@@ -109,6 +109,12 @@
     padding: 6px 10px !important;
     font-size: 12px !important;
   }
+  .app-logo-image { width: 104px !important; max-height: 32px !important; }
+  .nav-account-link { width: 34px; height: 34px; padding: 2px !important; justify-content: center; }
+  .nav-account-name, .nav-logout-text { display: none; }
+  .nav-avatar { width: 28px; height: 28px; }
+  .nav-logout-btn { width: 34px; height: 34px; padding: 0 !important; justify-content: center; }
+  .nav-logout-icon { display: inline; font-size: 18px; line-height: 1; }
 
   /* ── Layout ── */
   .main-layout {
@@ -224,6 +230,47 @@
   .search-layout {
     grid-template-columns: 1fr !important;
   }
+  .filters-sidebar {
+    display: block !important;
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100dvh !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    padding: 20px 18px 90px !important;
+    z-index: 1100 !important;
+    overflow-y: auto !important;
+    transform: translateX(-100%);
+    visibility: hidden;
+    transition: transform 220ms ease, visibility 220ms;
+  }
+  .filters-sidebar.mobile-open { transform: translateX(0); visibility: visible; }
+  body.filters-open { overflow: hidden; }
+  .filter-sidebar-heading {
+    position: sticky;
+    top: -20px;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: -20px -18px 20px;
+    padding: 16px 18px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--surface-border);
+  }
+  .filter-close-btn {
+    display: block !important;
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-full);
+    background: var(--background);
+    color: var(--text-main);
+    font-size: 26px;
+    line-height: 1;
+  }
+  .mobile-filter-btn { display: inline-flex !important; min-height: 42px; justify-content: center; }
   .search-header {
     flex-direction: column !important;
     align-items: stretch !important;
@@ -231,9 +278,12 @@
     padding: 16px !important;
   }
   .search-header div:last-child {
-    justify-content: space-between !important;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px !important;
     width: 100% !important;
   }
+  #sort-select { width: 100% !important; min-height: 42px; }
 
   /* ── Home: Hero search box ── */
   .hero-title {
@@ -319,7 +369,7 @@
   }
 
   .app-logo-image {
-    width: min(135px, 42vw);
+    width: 92px !important;
     height: auto;
   }
 
@@ -650,7 +700,7 @@
   }
 
   .filters-sidebar {
-    display: none !important;
+    display: block !important;
   }
 
   .form-container,

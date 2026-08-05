@@ -43,10 +43,10 @@ const Navigation = {
       }
 
       actionsHtml = `
-        <a href="/pages/profile.html" class="nav-link flex align-center gap-10" style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${user.full_name || 'My Profile'}">
-          ${avatarHtml} ${user.full_name || 'My Profile'}
+        <a href="/pages/profile.html" class="nav-link nav-account-link" title="${user.full_name || 'My Profile'}" aria-label="Open profile for ${user.full_name || 'My Profile'}">
+          ${avatarHtml}<span class="nav-account-name">${user.full_name || 'My Profile'}</span>
         </a>
-        <button id="logout-btn" class="btn btn-outline" style="padding: 6px 12px; font-size: 13px;">Log Out</button>
+        <button id="logout-btn" class="btn btn-outline nav-logout-btn" title="Log out" aria-label="Log out"><span class="nav-logout-icon" aria-hidden="true">&#x21AA;</span><span class="nav-logout-text">Log Out</span></button>
       `;
     } else {
       actionsHtml = `

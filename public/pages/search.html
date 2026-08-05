@@ -54,6 +54,8 @@
       border-radius: var(--radius-md);
       padding: 16px 24px;
     }
+    .filter-sidebar-heading h3 { margin: 0; }
+    .filter-close-btn, .mobile-filter-btn { display: none; }
 
     /* Sponsored horizontal strip */
     .sponsored-strip {
@@ -143,8 +145,11 @@
       <div class="search-layout">
         
         <!-- Filters Sidebar (Desktop) -->
-        <aside class="filters-sidebar hide-mobile">
-          <h3 class="mb-20">Refine Search</h3>
+        <aside class="filters-sidebar" id="filters-sidebar" aria-label="Refine search">
+          <div class="filter-sidebar-heading">
+            <h3>Refine Search</h3>
+            <button type="button" id="close-filters-btn" class="filter-close-btn" aria-label="Close search filters">&times;</button>
+          </div>
           
           <form id="filter-form">
             <!-- Keyword search -->
@@ -264,6 +269,7 @@
             </div>
             
             <div class="flex gap-20 align-center">
+              <button type="button" id="open-filters-btn" class="btn btn-primary mobile-filter-btn" aria-controls="filters-sidebar" aria-expanded="false">Refine Search</button>
               <!-- Sort selection -->
               <select id="sort-select" class="form-control" style="width: 150px; padding: 6px 12px; border-radius: var(--radius-sm);">
                 <option value="best_match">Best Match</option>
@@ -341,10 +347,28 @@
 
       // Bind Filter submits
       const filterForm = document.getElementById('filter-form');
+      const filtersSidebar = document.getElementById('filters-sidebar');
+      const openFiltersBtn = document.getElementById('open-filters-btn');
+      const closeFiltersBtn = document.getElementById('close-filters-btn');
+
+      function setFiltersOpen(isOpen) {
+        filtersSidebar.classList.toggle('mobile-open', isOpen);
+        openFiltersBtn.setAttribute('aria-expanded', String(isOpen));
+        document.body.classList.toggle('filters-open', isOpen);
+        (isOpen ? closeFiltersBtn : openFiltersBtn).focus();
+      }
+
+      openFiltersBtn.addEventListener('click', () => setFiltersOpen(true));
+      closeFiltersBtn.addEventListener('click', () => setFiltersOpen(false));
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && filtersSidebar.classList.contains('mobile-open')) setFiltersOpen(false);
+      });
+
       filterForm.addEventListener('submit', (e) => {
         e.preventDefault();
         currentPage = 1;
         fetchListings();
+        if (window.matchMedia('(max-width: 768px)').matches) setFiltersOpen(false);
       });
 
       document.getElementById('use-location-btn').addEventListener('click', requestUserLocation);
