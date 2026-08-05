@@ -12,11 +12,11 @@
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://annexlk.lk/pages/listing.html">
   <meta property="og:site_name" content="AnnexLK">
-  <meta property="og:image" content="https://annexlk.lk/assets/images/branding/banner.svg">
+  <meta property="og:image" content="https://annexlk.lk/assets/images/branding/banner.webp">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Rental Property Details | AnnexLK">
   <meta name="twitter:description" content="View rent, facilities, availability and location details on AnnexLK.">
-  <meta name="twitter:image" content="https://annexlk.lk/assets/images/branding/banner.svg">
+  <meta name="twitter:image" content="https://annexlk.lk/assets/images/branding/banner.webp">
   
   <link rel="icon" type="image/svg+xml" href="/assets/images/branding/favicon.svg">
   <link rel="stylesheet" href="/assets/css/variables.css">
@@ -443,7 +443,7 @@
         .replace(/\s+/g, ' ').trim().slice(0, 160);
       const canonicalUrl = `https://annexlk.lk/property/${encodeURIComponent(slug)}`;
       const imagePath = property.images?.[0]?.full_path || property.images?.[0]?.medium_path || property.main_thumbnail;
-      const imageUrl = imagePath ? new URL(imagePath, window.location.origin).href : 'https://annexlk.lk/assets/images/branding/banner.svg';
+      const imageUrl = imagePath ? new URL(imagePath, window.location.origin).href : 'https://annexlk.lk/assets/images/branding/banner.webp';
 
       document.querySelector('meta[name="description"]').content = description;
       document.querySelector('link[rel="canonical"]').href = canonicalUrl;
