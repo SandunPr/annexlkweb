@@ -207,6 +207,16 @@
             </div>
           </div>
 
+          <div class="form-group">
+            <button type="button" id="use-current-location" class="btn btn-secondary" aria-describedby="location-help location-status">
+              Use My Current Location
+            </button>
+            <p id="location-help" class="text-muted" style="font-size:12px; margin-top:8px;">
+              With your permission, your browser will share your device's current coordinates to position the property marker. You can adjust the marker before submitting. See our <a href="/pages/privacy.html#location-data" target="_blank" rel="noopener">Privacy Policy</a>.
+            </p>
+            <p id="location-status" role="status" aria-live="polite" style="font-size:12px; margin-top:6px;"></p>
+          </div>
+
           <div class="form-row hidden" id="map-picker-container">
             <div class="form-group" style="grid-column: span 2;">
               <label class="form-label">Drag the marker to your property's exact location (or click anywhere on the map):</label>
@@ -295,6 +305,14 @@
       let pickerMap = null;
       let marker = null;
 
+      const locationButton = document.getElementById('use-current-location');
+      const locationStatus = document.getElementById('location-status');
+
+      function setLocationStatus(message, isError = false) {
+        locationStatus.textContent = message;
+        locationStatus.style.color = isError ? 'var(--danger)' : 'var(--success)';
+      }
+
       function initPickerMap(lat, lng) {
         document.getElementById('map-picker-container').classList.remove('hidden');
         
@@ -326,6 +344,46 @@
           setTimeout(() => { pickerMap.invalidateSize(); }, 50);
         }
       }
+
+      locationButton.addEventListener('click', () => {
+        if (!window.isSecureContext) {
+          setLocationStatus('Current location is available only on HTTPS or localhost. You can still choose a city and adjust the map marker.', true);
+          return;
+        }
+
+        if (!navigator.geolocation) {
+          setLocationStatus('This browser does not support location access. Choose a city and adjust the map marker instead.', true);
+          return;
+        }
+
+        locationButton.disabled = true;
+        locationButton.textContent = 'Getting Location...';
+        setLocationStatus('Waiting for your browser location permission...');
+
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            document.getElementById('latitude').value = lat.toFixed(6);
+            document.getElementById('longitude').value = lng.toFixed(6);
+            initPickerMap(lat, lng);
+            setLocationStatus(`Current location added (accuracy about ${Math.round(position.coords.accuracy)} metres). Please adjust the marker if needed.`);
+            locationButton.disabled = false;
+            locationButton.textContent = 'Refresh My Current Location';
+          },
+          (error) => {
+            const messages = {
+              1: 'Location permission was not granted. You can allow it in browser settings, or choose a city and adjust the map marker.',
+              2: 'Your current location could not be determined. Check your device location service and try again.',
+              3: 'Getting your location took too long. Please try again or adjust the map marker manually.'
+            };
+            setLocationStatus(messages[error.code] || 'Could not get your current location. Please try again.', true);
+            locationButton.disabled = false;
+            locationButton.textContent = 'Try Current Location Again';
+          },
+          { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+        );
+      });
 
       const citySelect = document.getElementById('cityId');
       citySelect.addEventListener('change', () => {
