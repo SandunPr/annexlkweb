@@ -573,7 +573,9 @@
 
         const isFav = Session.isAuthenticated() && localStorage.getItem(`fav-${p.id}`) === 'true';
 
-        const listingUrl = `/property/${encodeURIComponent(p.slug)}`;
+        // Use the physical listing page so previews also work on static hosts
+        // that do not support Nginx's /property/:slug rewrite.
+        const listingUrl = `/pages/listing.html?slug=${encodeURIComponent(p.slug)}`;
 
         return `
           <div class="listing-card" data-listing-url="${listingUrl}" role="link" tabindex="0" aria-label="View listing preview">
@@ -690,7 +692,7 @@
         [...items, ...items].forEach(p => {
           const a = document.createElement('a');
           a.className = 'sponsored-chip';
-          a.href = `/property/${encodeURIComponent(p.slug)}`;
+          a.href = `/pages/listing.html?slug=${encodeURIComponent(p.slug)}`;
           const imgSrc = p.main_thumbnail ? `${p.main_thumbnail}` : '';
           const imgHTML = imgSrc
             ? `<img class="sponsored-chip-thumb" src="${imgSrc}" alt="" loading="lazy">`
