@@ -85,6 +85,15 @@
   transition: transform var(--transition-md), box-shadow var(--transition-md);
 }
 
+.listing-card[data-listing-url] {
+  cursor: pointer;
+}
+
+.listing-card[data-listing-url]:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 3px;
+}
+
 .listing-card:hover {
   transform: translateY(-6px);
   box-shadow: var(--shadow-lg);

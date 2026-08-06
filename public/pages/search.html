@@ -196,9 +196,12 @@
             <div class="form-group">
               <label class="form-label">Search Radius</label>
               <select id="filter-distance" class="form-control">
-                <option value="2">Within 2 km</option>
-                <option value="5" selected>Within 5 km</option>
+                <option value="" selected>Anywhere</option>
                 <option value="10">Within 10 km</option>
+                <option value="25">Within 25 km</option>
+                <option value="50">Within 50 km</option>
+                <option value="100">Within 100 km</option>
+                <option value="200">Within 200 km</option>
               </select>
             </div>
 
@@ -454,7 +457,10 @@
           document.getElementById('sort-select').value = 'closest';
           button.disabled = false;
           button.textContent = '✓ Using My Location';
-          status.textContent = `Showing properties within ${document.getElementById('filter-distance').value} km. Your coordinates are not saved.`;
+          const radius = document.getElementById('filter-distance').value;
+          status.textContent = radius
+            ? `Showing properties within ${radius} km. Your coordinates are not saved.`
+            : 'Showing properties at any distance. Your coordinates are not saved.';
           currentPage = 1;
           fetchListings();
         },
@@ -505,12 +511,12 @@
       if (maxRent) params.append('maxRent', maxRent);
       if (university) {
         params.append('universityId', university);
-        params.append('universityDistance', distance);
+        if (distance) params.append('universityDistance', distance);
       }
       if (userLocation) {
         params.append('latitude', userLocation.latitude.toFixed(6));
         params.append('longitude', userLocation.longitude.toFixed(6));
-        params.append('distance', distance);
+        if (distance) params.append('distance', distance);
       }
       if (verified) params.append('verifiedOwner', 'true');
       params.append('sortBy', sortBy);
@@ -567,8 +573,10 @@
 
         const isFav = Session.isAuthenticated() && localStorage.getItem(`fav-${p.id}`) === 'true';
 
+        const listingUrl = `/property/${encodeURIComponent(p.slug)}`;
+
         return `
-          <div class="listing-card">
+          <div class="listing-card" data-listing-url="${listingUrl}" role="link" tabindex="0" aria-label="View listing preview">
             <div class="card-img-container">
               <img src="${mainThumbnail}" class="card-img" alt="${p.title}" loading="lazy">
               
@@ -585,7 +593,7 @@
             
             <div class="card-content">
               <div class="card-price">${parseFloat(p.rent).toLocaleString()} LKR<span> / month</span></div>
-              <a href="/property/${encodeURIComponent(p.slug)}" class="card-title">${p.title}</a>
+              <a href="${listingUrl}" class="card-title">${p.title}</a>
               
               <div class="card-location">
                 <span>📍</span> ${p.address_text || p.city_name}
@@ -607,6 +615,26 @@
           e.stopPropagation();
           const propertyId = btn.getAttribute('data-id');
           await toggleFavourite(btn, propertyId);
+        });
+      });
+
+      // Make the complete search-result card open its listing preview. Keep
+      // buttons and links independently interactive.
+      grid.querySelectorAll('.listing-card').forEach((card) => {
+        const openListing = () => {
+          window.location.href = card.dataset.listingUrl;
+        };
+
+        card.addEventListener('click', (event) => {
+          if (event.target.closest('a, button')) return;
+          openListing();
+        });
+
+        card.addEventListener('keydown', (event) => {
+          if ((event.key === 'Enter' || event.key === ' ') && !event.target.closest('a, button')) {
+            event.preventDefault();
+            openListing();
+          }
         });
       });
     }
