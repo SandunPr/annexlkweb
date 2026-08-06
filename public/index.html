@@ -4,6 +4,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>
+    // If the server falls back to index.html for a clean property URL,
+    // forward the request to the physical listing page in the browser.
+    (() => {
+      const propertyMatch = window.location.pathname.match(/^\/property\/([^/]+)\/?$/);
+      if (!propertyMatch) return;
+
+      let slug = propertyMatch[1];
+      try { slug = decodeURIComponent(slug); } catch (_) { /* keep original */ }
+      window.location.replace(`/pages/listing.html?${new URLSearchParams({ slug })}`);
+    })();
+  </script>
   <title>AnnexLK — Sri Lanka's Trusted Property Discovery Platform</title>
   <meta name="description" content="Find annexes, boarding rooms, apartments and rental homes across Sri Lanka. Browse trusted property listings by location, rent and tenant preference on AnnexLK.">
   <meta name="robots" content="index,follow,max-image-preview:large">
