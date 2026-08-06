@@ -231,6 +231,7 @@
       overflow: hidden;
       cursor: grab;
       user-select: none;
+      touch-action: pan-y;
       position: relative;
     }
 
@@ -279,6 +280,13 @@
 
     .promo-card:hover {
       transform: translateY(-6px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .promo-card:focus-visible {
+      outline: 3px solid var(--primary);
+      outline-offset: 3px;
+      transform: translateY(-3px);
       box-shadow: var(--shadow-lg);
     }
 
@@ -629,7 +637,7 @@
       // Duplicate items for seamless looping
       const looped = [...items, ...items];
 
-      looped.forEach(p => {
+      looped.forEach((p, index) => {
         const typeLabel = (p.property_type || '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
         const rentFmt = Number(p.rent).toLocaleString();
         const imgHTML = p.main_thumbnail
@@ -639,6 +647,14 @@
         const card = document.createElement('a');
         card.className = 'promo-card';
         card.href = `/pages/listing.html?slug=${encodeURIComponent(p.slug)}`;
+        card.setAttribute('aria-label', `View promoted listing: ${p.title}`);
+
+        // The second set exists only for the looping animation. Keeping those
+        // duplicates out of the accessibility tree prevents repeated links.
+        if (index >= items.length) {
+          card.tabIndex = -1;
+          card.setAttribute('aria-hidden', 'true');
+        }
         card.innerHTML = `
           ${imgHTML}
           <span class="promo-sponsored-tag">Sponsored</span>
@@ -672,19 +688,48 @@
       }
 
       // Auto-scroll every 3.5 seconds
-      let timer = setInterval(() => goTo(currentPage + 1), 3500);
+      let timer;
+      const startAutoScroll = () => {
+        clearInterval(timer);
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          timer = setInterval(() => goTo(currentPage + 1), 3500);
+        }
+      };
+      startAutoScroll();
 
-      // Pause on hover
+      // Pause while someone is hovering or navigating the cards by keyboard.
       const wrapper = document.getElementById('promo-track-wrapper');
       wrapper.addEventListener('mouseenter', () => clearInterval(timer));
-      wrapper.addEventListener('mouseleave', () => { timer = setInterval(() => goTo(currentPage + 1), 3500); });
+      wrapper.addEventListener('mouseleave', startAutoScroll);
+      wrapper.addEventListener('focusin', () => clearInterval(timer));
+      wrapper.addEventListener('focusout', (event) => {
+        if (!wrapper.contains(event.relatedTarget)) startAutoScroll();
+      });
 
-      // Swipe / drag support
+      // Treat taps as link activations and suppress a click only after a real
+      // horizontal swipe. This keeps cards reliable on touch devices.
       let startX = 0;
-      wrapper.addEventListener('pointerdown', e => { startX = e.clientX; wrapper.setPointerCapture(e.pointerId); });
+      let suppressClick = false;
+      wrapper.addEventListener('pointerdown', (event) => {
+        if (event.button !== 0) return;
+        startX = event.clientX;
+        suppressClick = false;
+      });
       wrapper.addEventListener('pointerup', e => {
         const delta = startX - e.clientX;
-        if (Math.abs(delta) > 40) goTo(currentPage + (delta > 0 ? 1 : -1 + items.length));
+        if (Math.abs(delta) > 40) {
+          suppressClick = true;
+          goTo(currentPage + (delta > 0 ? 1 : -1 + items.length));
+        }
+      });
+      wrapper.addEventListener('click', (event) => {
+        if (!suppressClick) return;
+        event.preventDefault();
+        event.stopPropagation();
+        suppressClick = false;
+      }, true);
+      wrapper.addEventListener('pointercancel', () => {
+        suppressClick = false;
       });
     }
   </script>
