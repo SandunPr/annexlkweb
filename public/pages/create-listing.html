@@ -79,6 +79,35 @@
       margin-top: 4px;
       word-break: break-all;
     }
+
+    .listing-expiry-notice {
+      display: flex;
+      gap: 12px;
+      margin: 0 0 20px;
+      padding: 16px;
+      color: var(--text-main);
+      background: var(--warning-light);
+      border: 1px solid var(--warning);
+      border-radius: var(--radius-md);
+    }
+
+    .listing-expiry-notice-icon {
+      flex: 0 0 auto;
+      font-size: 22px;
+      line-height: 1.2;
+    }
+
+    .listing-expiry-notice strong,
+    .listing-expiry-notice span {
+      display: block;
+    }
+
+    .listing-expiry-notice span {
+      margin-top: 4px;
+      color: var(--text-muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
   </style>
 </head>
 <body>
@@ -263,6 +292,14 @@
             <label class="checkbox-label"><input type="checkbox" value="9" class="checkbox-control facility-check"> <span>Furnished Room</span></label>
             <label class="checkbox-label"><input type="checkbox" value="10" class="checkbox-control facility-check"> <span>Air Conditioning</span></label>
           </div>
+
+          <aside class="listing-expiry-notice" role="note" aria-label="Listing availability period">
+            <span class="listing-expiry-notice-icon" aria-hidden="true">&#9201;&#65039;</span>
+            <div>
+              <strong>Listings must be confirmed every 30 days</strong>
+              <span>Once approved, your listing remains active for 30 days. We will remind you 3 days before it expires. Use <b>Confirm Available</b> on your Owner Dashboard to reset the 30-day period. Expired listings can be reactivated by confirming availability.</span>
+            </div>
+          </aside>
 
           <button type="submit" id="submit-btn" class="btn btn-primary" style="width: 100%; height: 50px; font-size: 15px;">Create Listing (Submit for Review)</button>
         </form>
