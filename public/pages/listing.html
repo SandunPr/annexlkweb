@@ -135,6 +135,28 @@
       font-weight: 500;
     }
 
+    /* Responsive Google AdSense unit above the contact card. */
+    .listing-ad-card {
+      padding: 12px;
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+    .listing-ad-label {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--text-muted);
+      font-size: 10px;
+      line-height: 1;
+      letter-spacing: 0.08em;
+      text-align: center;
+      text-transform: uppercase;
+    }
+    .listing-ad-slot {
+      display: block;
+      width: 100%;
+      min-height: 250px;
+    }
+
     /* Sticky action bar widget (Mobile) */
     .sticky-contact-bar {
       position: fixed;
@@ -159,6 +181,8 @@
       .main-layout { padding-bottom: 150px; }
       .sticky-sidebar { position: static !important; }
       .info-card { padding: 20px 16px; }
+      .listing-ad-card { padding: 10px; }
+      .listing-ad-slot { min-height: 100px; }
       .info-title { font-size: 20px; }
       .price-badge { font-size: 26px; }
     }
@@ -235,6 +259,10 @@
 
     let currentSlide = 0;
     let propertyId = null;
+
+    // Replace these values with the publisher and ad-unit IDs from AdSense.
+    const ADSENSE_CLIENT_ID = 'ca-pub-XXXXXXXXXXXXXXXX';
+    const LISTING_AD_SLOT_ID = 'XXXXXXXXXX';
 
     document.addEventListener('DOMContentLoaded', async () => {
       Navigation.init();
@@ -358,6 +386,15 @@
 
               <!-- Right Actions Sidebar -->
               <aside class="details-right">
+                <div class="info-card listing-ad-card hidden" id="listing-ad-card" aria-label="Advertisement">
+                  <span class="listing-ad-label">Advertisement</span>
+                  <ins class="adsbygoogle listing-ad-slot"
+                    data-ad-client="${ADSENSE_CLIENT_ID}"
+                    data-ad-slot="${LISTING_AD_SLOT_ID}"
+                    data-ad-format="auto"
+                    data-full-width-responsive="true"></ins>
+                </div>
+
                 <div class="info-card sticky-sidebar" style="position: sticky; top: 92px;">
                   <h3 class="mb-20">Contact Property Owner</h3>
                   
@@ -425,6 +462,8 @@
               await handleContactReveal(btn, type);
             });
           });
+
+          initializeListingAd();
         }
       } catch (err) {
         container.innerHTML = `
@@ -435,6 +474,30 @@
             <a href="/pages/search.html" class="btn btn-primary mt-20">Back to Search</a>
           </div>
         `;
+      }
+    }
+
+    function initializeListingAd() {
+      const adCard = document.getElementById('listing-ad-card');
+      const hasClientId = /^ca-pub-\d+$/.test(ADSENSE_CLIENT_ID);
+      const hasSlotId = /^\d+$/.test(LISTING_AD_SLOT_ID);
+      if (!adCard || !hasClientId || !hasSlotId) return;
+
+      adCard.classList.remove('hidden');
+
+      if (!document.querySelector('script[data-annexlk-adsense]')) {
+        const script = document.createElement('script');
+        script.async = true;
+        script.crossOrigin = 'anonymous';
+        script.dataset.annexlkAdsense = 'true';
+        script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${encodeURIComponent(ADSENSE_CLIENT_ID)}`;
+        document.head.appendChild(script);
+      }
+
+      try {
+        (window.adsbygoogle = window.adsbygoogle || []).push({});
+      } catch (error) {
+        console.warn('Unable to initialize listing advertisement.', error);
       }
     }
 
