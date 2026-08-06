@@ -45,8 +45,10 @@
       align-self: start;
       height: calc(100dvh - var(--header-height) - 40px);
       max-height: calc(100dvh - var(--header-height) - 40px);
-      overflow-y: auto;
+      overflow: hidden !important;
       overscroll-behavior: contain;
+      display: flex;
+      flex-direction: column;
     }
 
     /* Keep the desktop filters attached to the viewport while only the
@@ -58,12 +60,11 @@
         top: var(--filters-top-offset, calc(var(--header-height) + 20px));
         left: max(20px, calc((100vw - var(--max-width)) / 2 + 20px));
         width: 300px;
-        height: auto;
-        max-height: none;
-        bottom: var(--filters-bottom-offset, 20px);
+        height: calc(100dvh - var(--filters-top-offset, 92px) - 20px);
+        max-height: calc(100dvh - var(--filters-top-offset, 92px) - 20px);
+        bottom: auto;
         z-index: 50;
         transition: opacity 150ms ease, visibility 150ms ease;
-        margin-top: 80px;
       }
 
       .filters-sidebar.footer-obscured {
@@ -86,13 +87,29 @@
       border-radius: var(--radius-md);
       padding: 16px 24px;
     }
+    .filter-sidebar-heading { flex: 0 0 auto; }
     .filter-sidebar-heading h3 { margin: 0; }
     .filter-close-btn, .mobile-filter-btn { display: none; }
 
+    #filter-form {
+      display: flex;
+      flex: 1 1 auto;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .filter-controls {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      padding-right: 4px;
+    }
+
     .filter-actions {
-      position: sticky;
-      bottom: -24px;
+      position: relative;
       z-index: 4;
+      flex: 0 0 auto;
       display: grid;
       grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr);
       gap: 10px;
@@ -226,6 +243,7 @@
           </div>
           
           <form id="filter-form">
+            <div class="filter-controls">
             <!-- Keyword search -->
             <div class="form-group">
               <label class="form-label">Keyword</label>
@@ -329,6 +347,8 @@
                 <label class="checkbox-label"><input type="checkbox" value="11" class="checkbox-control facility-checkbox"> <span>Parking Slot</span></label>
                 <label class="checkbox-label"><input type="checkbox" value="15" class="checkbox-control facility-checkbox"> <span>Separate Entrance</span></label>
               </div>
+            </div>
+
             </div>
 
             <div class="filter-actions" aria-label="Filter actions">
