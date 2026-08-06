@@ -55,6 +55,7 @@
     @media (min-width: 769px) {
       .filters-sidebar {
         position: fixed;
+        top: var(--filters-top-offset, calc(var(--header-height) + 20px));
         left: max(20px, calc((100vw - var(--max-width)) / 2 + 20px));
         width: 300px;
         height: auto;
@@ -109,6 +110,11 @@
 
     @media (max-width: 768px) {
       .filters-sidebar {
+        top: var(--header-height) !important;
+        right: 0 !important;
+        bottom: 60px !important;
+        left: 0 !important;
+        height: auto !important;
         padding-bottom: 0 !important;
         max-height: none;
       }
@@ -427,23 +433,28 @@
       // available height as the footer enters the viewport, then hide it when
       // too little useful space remains.
       const appFooter = document.getElementById('app-footer');
+      const appHeader = document.getElementById('app-header');
       let footerSyncFrame = null;
 
       function syncFiltersWithFooter() {
         footerSyncFrame = null;
 
         if (window.matchMedia('(max-width: 768px)').matches) {
+          filtersSidebar.style.removeProperty('--filters-top-offset');
           filtersSidebar.style.removeProperty('--filters-bottom-offset');
           filtersSidebar.classList.remove('footer-obscured');
           return;
         }
 
-        const fixedTop = parseFloat(getComputedStyle(filtersSidebar).top) || 92;
+        const headerBottom = Math.max(0, appHeader.getBoundingClientRect().bottom);
+        const fixedTop = headerBottom + 20;
         const footerTop = appFooter.getBoundingClientRect().top;
         const footerOverlap = Math.max(0, window.innerHeight - footerTop);
-        const availableHeight = footerTop - fixedTop - 20;
+        const bottomOffset = footerOverlap + 20;
+        const availableHeight = window.innerHeight - fixedTop - bottomOffset;
 
-        filtersSidebar.style.setProperty('--filters-bottom-offset', `${footerOverlap + 20}px`);
+        filtersSidebar.style.setProperty('--filters-top-offset', `${fixedTop}px`);
+        filtersSidebar.style.setProperty('--filters-bottom-offset', `${bottomOffset}px`);
         filtersSidebar.classList.toggle('footer-obscured', availableHeight < 180);
       }
 
