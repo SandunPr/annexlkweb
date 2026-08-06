@@ -63,6 +63,7 @@
         bottom: var(--filters-bottom-offset, 20px);
         z-index: 50;
         transition: opacity 150ms ease, visibility 150ms ease;
+        margin-top: 80px;
       }
 
       .filters-sidebar.footer-obscured {
@@ -429,9 +430,8 @@
       const openFiltersBtn = document.getElementById('open-filters-btn');
       const closeFiltersBtn = document.getElementById('close-filters-btn');
 
-      // A fixed desktop sidebar must stop before the footer. Reduce its
-      // available height as the footer enters the viewport, then hide it when
-      // too little useful space remains.
+      // A fixed desktop sidebar must never cover the footer. Hide it as soon
+      // as the footer enters the viewport and restore it above the footer.
       const appFooter = document.getElementById('app-footer');
       const appHeader = document.getElementById('app-header');
       let footerSyncFrame = null;
@@ -451,11 +451,10 @@
         const footerTop = appFooter.getBoundingClientRect().top;
         const footerOverlap = Math.max(0, window.innerHeight - footerTop);
         const bottomOffset = footerOverlap + 20;
-        const availableHeight = window.innerHeight - fixedTop - bottomOffset;
 
         filtersSidebar.style.setProperty('--filters-top-offset', `${fixedTop}px`);
         filtersSidebar.style.setProperty('--filters-bottom-offset', `${bottomOffset}px`);
-        filtersSidebar.classList.toggle('footer-obscured', availableHeight < 180);
+        filtersSidebar.classList.toggle('footer-obscured', footerOverlap > 0);
       }
 
       function scheduleFooterSync() {
