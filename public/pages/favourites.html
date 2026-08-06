@@ -123,7 +123,7 @@
                 
                 <div class="card-content">
                   <div class="card-price">${parseFloat(p.rent).toLocaleString()} LKR<span> / month</span></div>
-                  <a href="/property/${encodeURIComponent(p.slug)}" class="card-title">${p.title}</a>
+                  <a href="/pages/listing.html?slug=${encodeURIComponent(p.slug)}" class="card-title">${p.title}</a>
                   
                   <div class="card-location">
                     <span>📍</span> ${p.city_name}

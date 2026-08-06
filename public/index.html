@@ -626,7 +626,7 @@
 
         const card = document.createElement('a');
         card.className = 'promo-card';
-        card.href = `/property/${encodeURIComponent(p.slug)}`;
+        card.href = `/pages/listing.html?slug=${encodeURIComponent(p.slug)}`;
         card.innerHTML = `
           ${imgHTML}
           <span class="promo-sponsored-tag">Sponsored</span>

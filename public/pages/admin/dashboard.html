@@ -737,7 +737,7 @@
                 <td>${r.reporter_email}</td>
                 <td>
                   <strong>${r.property_title}</strong><br>
-                  <a href="/property/${encodeURIComponent(r.property_slug)}" target="_blank" class="text-primary" style="font-size:12px;">View Ad &raquo;</a>
+                  <a href="/pages/listing.html?slug=${encodeURIComponent(r.property_slug)}" target="_blank" class="text-primary" style="font-size:12px;">View Ad &raquo;</a>
                 </td>
                 <td><span class="badge badge-warning">${r.category}</span></td>
                 <td>${r.comment || '-'}</td>
