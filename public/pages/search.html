@@ -57,6 +57,38 @@
     .filter-sidebar-heading h3 { margin: 0; }
     .filter-close-btn, .mobile-filter-btn { display: none; }
 
+    .filter-actions {
+      position: sticky;
+      bottom: -24px;
+      z-index: 4;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr);
+      gap: 10px;
+      margin: 8px -24px -24px;
+      padding: 14px 24px 24px;
+      background: var(--surface);
+      border-top: 1px solid var(--surface-border);
+      box-shadow: 0 -8px 18px rgba(15, 23, 42, 0.08);
+    }
+
+    .filter-actions .btn {
+      width: 100%;
+      min-width: 0;
+      margin: 0;
+    }
+
+    @media (max-width: 768px) {
+      .filters-sidebar {
+        padding-bottom: 0 !important;
+      }
+
+      .filter-actions {
+        bottom: 0;
+        margin: 8px -18px 0;
+        padding: 12px 18px calc(12px + env(safe-area-inset-bottom));
+      }
+    }
+
     /* Sponsored horizontal strip */
     .sponsored-strip {
       border: 1px dashed #f59e0b;
@@ -257,8 +289,10 @@
               </div>
             </div>
 
-            <button type="submit" class="btn btn-primary" style="width: 100%;">Apply Filters</button>
-            <button type="button" id="reset-filters" class="btn btn-outline" style="width: 100%; margin-top: 10px;">Reset</button>
+            <div class="filter-actions" aria-label="Filter actions">
+              <button type="button" id="reset-filters" class="btn btn-outline">Reset</button>
+              <button type="submit" id="apply-filters" class="btn btn-primary">Apply Filters</button>
+            </div>
           </form>
         </aside>
 
