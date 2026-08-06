@@ -57,7 +57,17 @@
         position: fixed;
         left: max(20px, calc((100vw - var(--max-width)) / 2 + 20px));
         width: 300px;
+        height: auto;
+        max-height: none;
+        bottom: var(--filters-bottom-offset, 20px);
         z-index: 50;
+        transition: opacity 150ms ease, visibility 150ms ease;
+      }
+
+      .filters-sidebar.footer-obscured {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
       }
 
       .results-container {
@@ -412,6 +422,39 @@
       const filtersSidebar = document.getElementById('filters-sidebar');
       const openFiltersBtn = document.getElementById('open-filters-btn');
       const closeFiltersBtn = document.getElementById('close-filters-btn');
+
+      // A fixed desktop sidebar must stop before the footer. Reduce its
+      // available height as the footer enters the viewport, then hide it when
+      // too little useful space remains.
+      const appFooter = document.getElementById('app-footer');
+      let footerSyncFrame = null;
+
+      function syncFiltersWithFooter() {
+        footerSyncFrame = null;
+
+        if (window.matchMedia('(max-width: 768px)').matches) {
+          filtersSidebar.style.removeProperty('--filters-bottom-offset');
+          filtersSidebar.classList.remove('footer-obscured');
+          return;
+        }
+
+        const fixedTop = parseFloat(getComputedStyle(filtersSidebar).top) || 92;
+        const footerTop = appFooter.getBoundingClientRect().top;
+        const footerOverlap = Math.max(0, window.innerHeight - footerTop);
+        const availableHeight = footerTop - fixedTop - 20;
+
+        filtersSidebar.style.setProperty('--filters-bottom-offset', `${footerOverlap + 20}px`);
+        filtersSidebar.classList.toggle('footer-obscured', availableHeight < 180);
+      }
+
+      function scheduleFooterSync() {
+        if (footerSyncFrame !== null) return;
+        footerSyncFrame = requestAnimationFrame(syncFiltersWithFooter);
+      }
+
+      window.addEventListener('scroll', scheduleFooterSync, { passive: true });
+      window.addEventListener('resize', scheduleFooterSync);
+      scheduleFooterSync();
 
       function setFiltersOpen(isOpen) {
         filtersSidebar.classList.toggle('mobile-open', isOpen);
